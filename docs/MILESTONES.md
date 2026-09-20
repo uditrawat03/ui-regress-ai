@@ -18,14 +18,14 @@ Exit condition: a new contributor understands what is being built and how succes
 
 ## Milestone 1 — Classical visual baseline
 
-- [ ] image pair loader
-- [ ] dimension validation
-- [ ] absolute difference heatmap
-- [ ] changed-area ratio
-- [ ] structural-similarity baseline
-- [ ] CLI `compare`
-- [ ] JSON output schema
-- [ ] unit tests
+- [x] image pair loader
+- [x] dimension validation
+- [x] absolute difference heatmap
+- [x] changed-area ratio
+- [x] structural-similarity baseline
+- [x] CLI `compare`
+- [x] JSON output schema
+- [x] unit tests
 
 Exit condition: we can benchmark a deterministic non-ML solution.
 

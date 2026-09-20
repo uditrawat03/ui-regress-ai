@@ -107,51 +107,54 @@ Target path on Windows:
 C:\working\Projects\Python\ui-regress-ai
 ```
 
-Create a virtual environment:
+This project uses `uv` for dependency and environment management:
 
 ```powershell
 cd C:\working\Projects\Python\ui-regress-ai
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -e ".[dev]"
+uv sync --all-extras
 ```
 
 Check available acceleration:
 
 ```powershell
-uiregress device
+uv run uiregress device
 ```
 
-Expected NVIDIA setup:
+The repository pins PyTorch to the CUDA 13.2 wheel index on Windows/Linux. A working NVIDIA setup should report:
 
 ```text
-device=cuda
-cuda_available=true
+"selected": "cuda"
+"cuda_available": true
 ```
 
-PyTorch installation can depend on the CUDA runtime and GPU driver in use. For CUDA builds, install the PyTorch build appropriate for the machine before or alongside the editable package install.
-
-## CLI target
-
-Current scaffold:
+Verify the complete environment with:
 
 ```powershell
-uiregress device
-uiregress info
+uv run python scripts\check_environment.py
 ```
 
-Target interface:
+## CLI
+
+Runtime information:
 
 ```powershell
-uiregress compare baseline.png current.png
+uv run uiregress device
+uv run uiregress info
 ```
 
-Target JSON mode:
+Compare two screenshots:
 
 ```powershell
-uiregress compare baseline.png current.png --format json
+uv run uiregress compare baseline.png current.png
 ```
+
+Write a visual difference heatmap:
+
+```powershell
+uv run uiregress compare baseline.png current.png --heatmap artifacts\diff.png
+```
+
+Exit code `0` means the baseline thresholds did not detect a meaningful difference. Exit code `1` means the comparison crossed the configured changed-area or SSIM threshold. Exit code `2` means the input or runtime configuration was invalid.
 
 ## Development principles
 

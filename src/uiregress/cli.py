@@ -8,6 +8,7 @@ import typer
 
 from uiregress import __version__
 from uiregress.device import resolve_device
+from uiregress.inference import compare_images
 
 app = typer.Typer(help="Semantic visual regression testing with PyTorch.")
 
@@ -41,20 +42,46 @@ def device(
 def compare(
     baseline: str,
     current: str,
+    device: str = typer.Option("auto", "--device", help="auto, cpu, or cuda"),
+    changed_pixel_threshold: float = typer.Option(
+        0.05,
+        "--changed-pixel-threshold",
+        help="Per-pixel mean RGB difference required to count as changed.",
+    ),
+    fail_changed_ratio: float = typer.Option(
+        0.01,
+        "--fail-changed-ratio",
+        help="Fail when at least this fraction of pixels changed.",
+    ),
+    fail_ssim_below: float = typer.Option(
+        0.99,
+        "--fail-ssim-below",
+        help="Fail when structural similarity is at or below this threshold.",
+    ),
+    heatmap: str | None = typer.Option(
+        None,
+        "--heatmap",
+        help="Optional output path for a grayscale difference heatmap.",
+    ),
 ) -> None:
-    """Placeholder for Milestone 1 screenshot comparison."""
-    typer.echo(
-        json.dumps(
-            {
-                "status": "not_implemented",
-                "baseline": baseline,
-                "current": current,
-                "next_milestone": "Implement deterministic classical comparison before ML inference.",
-            },
-            indent=2,
+    """Compare two screenshots with deterministic non-ML metrics."""
+    try:
+        result = compare_images(
+            baseline,
+            current,
+            device=device,
+            changed_pixel_threshold=changed_pixel_threshold,
+            fail_changed_ratio=fail_changed_ratio,
+            fail_ssim_below=fail_ssim_below,
+            heatmap_path=heatmap,
         )
-    )
-    raise typer.Exit(code=3)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(json.dumps(result.to_dict(), indent=2))
+    if result.different:
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":
