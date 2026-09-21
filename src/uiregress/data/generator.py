@@ -7,7 +7,7 @@ import shutil
 from collections.abc import Iterator
 from pathlib import Path
 
-from uiregress.data.mutations import ALL_LABELS
+from uiregress.data.mutations import ALL_LABELS, STANDARD_PROFILE, validate_generation_profile
 from uiregress.data.renderer import PlaywrightRenderer
 from uiregress.data.schema import DatasetSummary, SampleManifest
 from uiregress.data.splitting import split_fixtures
@@ -57,6 +57,7 @@ async def _generate_dataset_async(
     width: int,
     height: int,
     no_regression_fraction: float,
+    profile: str,
     overwrite: bool,
 ) -> DatasetSummary:
     if samples_per_fixture <= 0:
@@ -67,6 +68,7 @@ async def _generate_dataset_async(
         raise ValueError("no_regression_fraction must be between 0 and 1")
     if not version.strip():
         raise ValueError("version must not be empty")
+    validate_generation_profile(profile)
 
     fixtures_path = Path(fixtures_dir)
     output_path = Path(output_dir)
@@ -131,6 +133,7 @@ async def _generate_dataset_async(
                         sample_seed=sample_seed,
                         no_regression=no_regression,
                         regression_label=forced_label,
+                        profile=profile,
                     )
                     if expected_label is not None and rendered.label != expected_label:
                         raise RuntimeError(
@@ -169,6 +172,7 @@ async def _generate_dataset_async(
         manifest="manifest.jsonl",
         splits=split_counts,
         generation_mode=generation_mode,
+        generation_profile=profile,
         samples_per_class=samples_per_class,
         class_distribution=class_distribution,
         split_class_distribution=split_class_distribution,
@@ -191,6 +195,7 @@ def generate_dataset(
     width: int = 1280,
     height: int = 720,
     no_regression_fraction: float = 0.25,
+    profile: str = STANDARD_PROFILE,
     overwrite: bool = False,
 ) -> DatasetSummary:
     """Generate a dataset using Playwright's async API.
@@ -220,6 +225,7 @@ def generate_dataset(
             width=width,
             height=height,
             no_regression_fraction=no_regression_fraction,
+            profile=profile,
             overwrite=overwrite,
         )
     )

@@ -78,6 +78,19 @@ Exit condition: `synthetic-v0.2` can generate 1,080 balanced pairs with 12 train
 
 Exit condition: threshold and checkpoint selection never use the test split, and `benchmark.json` shows the learned detector adds measurable value over a classical baseline.
 
+### Milestone 3.3 — Semantic challenge and conditional type head
+
+- [x] remove `no_regression` from the regression-type head
+- [x] compute type loss only for positive regression samples
+- [x] add the `semantic-challenge` generation profile
+- [x] generate subtle positive mutations
+- [x] generate harmless hard-negative rendering variations
+- [x] persist generation profile and conditional-head metadata
+- [ ] learned detector beats at least one meaningful classical baseline on `synthetic-v0.3`
+
+Exit condition: the frozen v0.3 test benchmark demonstrates semantic value over at least one classical
+baseline without tuning on the test split.
+
 ## Milestone 4 — Localization
 
 - [ ] heatmap/localization target generation

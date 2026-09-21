@@ -104,6 +104,11 @@ def generate_dataset_command(
             "fixture. Overrides random class sampling when set."
         ),
     ),
+    profile: str = typer.Option(
+        "standard",
+        "--profile",
+        help="Generation profile: standard or semantic-challenge.",
+    ),
     seed: int = typer.Option(42, "--seed"),
     width: int = typer.Option(1280, "--width", min=1),
     height: int = typer.Option(720, "--height", min=1),
@@ -133,6 +138,7 @@ def generate_dataset_command(
             version=version,
             samples_per_fixture=samples_per_fixture,
             samples_per_class=samples_per_class,
+            profile=profile,
             seed=seed,
             width=width,
             height=height,

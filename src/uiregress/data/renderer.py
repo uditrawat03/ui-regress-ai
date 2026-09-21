@@ -6,8 +6,10 @@ from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any, Self
 
-from uiregress.data.augment import add_subtle_pixel_noise
+from uiregress.data.augment import add_rendering_variation, add_subtle_pixel_noise
 from uiregress.data.mutations import (
+    SEMANTIC_CHALLENGE_PROFILE,
+    STANDARD_PROFILE,
     choose_mutation,
     choose_mutation_for_label,
     no_regression_mutation,
@@ -100,6 +102,18 @@ class PlaywrightRenderer:
         return [f'[data-uiregress-target="{name}"]' for name in unique_names]
 
     @staticmethod
+    async def _challenge_selectors(page: Page, selectors: list[str]) -> list[str]:
+        ranked: list[tuple[float, str]] = []
+        for selector in selectors:
+            box = await page.locator(selector).bounding_box()
+            if box is None:
+                continue
+            ranked.append((float(box["width"]) * float(box["height"]), selector))
+        ranked.sort(key=lambda item: (item[0], item[1]))
+        keep = max(1, (len(ranked) + 1) // 2)
+        return [selector for _, selector in ranked[:keep]]
+
+    @staticmethod
     async def _apply_mutation(page: Page, mutation: MutationSpec) -> None:
         if mutation.selector is None:
             return
@@ -170,6 +184,7 @@ class PlaywrightRenderer:
         sample_seed: int,
         no_regression: bool,
         regression_label: str | None = None,
+        profile: str = STANDARD_PROFILE,
     ) -> RenderedPair:
         if not fixture.is_file():
             raise FileNotFoundError(f"Fixture not found: {fixture}")
@@ -193,20 +208,36 @@ class PlaywrightRenderer:
             if no_regression:
                 if regression_label is not None:
                     raise ValueError("regression_label cannot be set for a no-regression sample.")
-                mutation = no_regression_mutation()
-                add_subtle_pixel_noise(
-                    baseline_path,
-                    current_path,
-                    seed=sample_seed,
-                    amplitude=int(mutation.parameters["amplitude"]),
-                )
+                mutation = no_regression_mutation(rng, profile=profile)
+                if mutation.operator == "subtle_pixel_noise":
+                    add_subtle_pixel_noise(
+                        baseline_path,
+                        current_path,
+                        seed=sample_seed,
+                        amplitude=int(mutation.parameters["amplitude"]),
+                    )
+                else:
+                    add_rendering_variation(
+                        baseline_path,
+                        current_path,
+                        seed=sample_seed,
+                        mode=str(mutation.parameters["mode"]),
+                        amount=int(mutation.parameters["amount"]),
+                    )
                 region = None
             else:
                 selectors = await self._selectors(page)
+                if profile == SEMANTIC_CHALLENGE_PROFILE:
+                    selectors = await self._challenge_selectors(page, selectors)
                 mutation = (
-                    choose_mutation_for_label(rng, selectors, regression_label)
+                    choose_mutation_for_label(
+                        rng,
+                        selectors,
+                        regression_label,
+                        profile=profile,
+                    )
                     if regression_label is not None
-                    else choose_mutation(rng, selectors)
+                    else choose_mutation(rng, selectors, profile=profile)
                 )
                 locator = page.locator(mutation.selector)
                 before = BoundingBox.from_mapping(await locator.bounding_box())

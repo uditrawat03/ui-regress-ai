@@ -59,6 +59,27 @@ def _set_seed(seed: int) -> None:
         torch.backends.cudnn.deterministic = True
 
 
+def _regression_label_mapping(dataset_label_to_index: dict[str, int]) -> dict[str, int]:
+    labels = [
+        label
+        for label, _ in sorted(dataset_label_to_index.items(), key=lambda item: item[1])
+        if label != NO_REGRESSION_LABEL
+    ]
+    if len(labels) < 2:
+        raise ValueError("Training requires at least two regression classes.")
+    return {label: index for index, label in enumerate(labels)}
+
+
+def _regression_index_lookup(
+    dataset_label_to_index: dict[str, int],
+    regression_label_to_index: dict[str, int],
+) -> dict[int, int]:
+    return {
+        dataset_label_to_index[label]: regression_index
+        for label, regression_index in regression_label_to_index.items()
+    }
+
+
 def _binary_metrics(targets: list[int], predictions: list[int]) -> dict[str, float]:
     tp = sum(t == 1 and p == 1 for t, p in zip(targets, predictions, strict=True))
     tn = sum(t == 0 and p == 0 for t, p in zip(targets, predictions, strict=True))
@@ -228,6 +249,7 @@ def _run_epoch(
     scaler: torch.amp.GradScaler,
     amp_enabled: bool,
     index_to_label: dict[int, str],
+    regression_index_lookup: dict[int, int],
     binary_threshold: float = 0.5,
     return_outputs: bool = False,
 ) -> dict[str, Any]:
@@ -256,7 +278,23 @@ def _run_epoch(
             with torch.amp.autocast(device_type=device.type, enabled=amp_enabled):
                 output = model(baseline, current)
                 binary_loss = binary_loss_fn(output.binary_logits, binary_target)
-                class_loss = class_loss_fn(output.class_logits, class_target)
+                positive_mask = binary_target >= 0.5
+                if bool(positive_mask.any()):
+                    positive_dataset_targets = class_target[positive_mask].detach().cpu().tolist()
+                    regression_targets = torch.tensor(
+                        [
+                            regression_index_lookup[int(target)]
+                            for target in positive_dataset_targets
+                        ],
+                        dtype=torch.long,
+                        device=device,
+                    )
+                    positive_logits = output.class_logits[positive_mask]
+                    class_loss = class_loss_fn(positive_logits, regression_targets)
+                else:
+                    regression_targets = torch.empty(0, dtype=torch.long, device=device)
+                    positive_logits = output.class_logits[:0]
+                    class_loss = output.class_logits.sum() * 0.0
                 loss = binary_loss + class_loss
 
             if training:
@@ -271,14 +309,18 @@ def _run_epoch(
         probabilities = torch.sigmoid(output.binary_logits.detach())
         binary_targets.extend(binary_target.detach().round().int().cpu().tolist())
         binary_probabilities.extend(probabilities.cpu().tolist())
-        class_targets.extend(class_target.detach().cpu().tolist())
-        class_predictions.extend(output.class_logits.detach().argmax(dim=1).cpu().tolist())
+        if regression_targets.numel():
+            class_targets.extend(regression_targets.detach().cpu().tolist())
+            class_predictions.extend(
+                positive_logits.detach().argmax(dim=1).cpu().tolist()
+            )
 
     binary_predictions = _threshold_predictions(binary_probabilities, binary_threshold)
     result: dict[str, Any] = {
         "loss": total_loss / max(1, total_examples),
         "binary": _binary_metrics(binary_targets, binary_predictions),
         "binary_threshold": binary_threshold,
+        "multiclass_scope": "regression_only",
         "multiclass": _multiclass_metrics(
             class_targets,
             class_predictions,
@@ -315,14 +357,15 @@ def _checkpoint_payload(
     optimizer: AdamW,
     epoch: int,
     config: TrainingConfig,
-    label_to_index: dict[str, int],
+    dataset_label_to_index: dict[str, int],
+    regression_label_to_index: dict[str, int],
     dataset_metadata: dict[str, Any],
     validation_metrics: dict[str, Any],
     checkpoint_role: str,
     binary_threshold: float,
 ) -> dict[str, Any]:
     return {
-        "format_version": 2,
+        "format_version": 3,
         "architecture": model.architecture_name,
         "epoch": epoch,
         "model_state_dict": model.state_dict(),
@@ -330,7 +373,9 @@ def _checkpoint_payload(
         "model": {
             "num_classes": model.num_classes,
         },
-        "class_mapping": label_to_index,
+        "class_mapping": regression_label_to_index,
+        "dataset_class_mapping": dataset_label_to_index,
+        "classification_scope": "regression_only",
         "preprocessing": {
             "version": PREPROCESSING_VERSION,
             "input_size": config.input_size,
@@ -448,26 +493,29 @@ def train_model(
     _set_seed(config.seed)
     dataset_root = Path(config.dataset_root)
     dataset_metadata = load_dataset_metadata(dataset_root)
-    label_to_index = build_label_mapping(dataset_root)
-    if len(label_to_index) < 2:
-        raise ValueError("Training requires at least two classes in the dataset.")
+    dataset_label_to_index = build_label_mapping(dataset_root)
+    regression_label_to_index = _regression_label_mapping(dataset_label_to_index)
+    regression_index_lookup = _regression_index_lookup(
+        dataset_label_to_index,
+        regression_label_to_index,
+    )
 
     train_dataset = PairedScreenshotDataset(
         dataset_root,
         split="train",
-        label_to_index=label_to_index,
+        label_to_index=dataset_label_to_index,
         input_size=config.input_size,
     )
     validation_dataset = PairedScreenshotDataset(
         dataset_root,
         split="validation",
-        label_to_index=label_to_index,
+        label_to_index=dataset_label_to_index,
         input_size=config.input_size,
     )
     test_dataset = PairedScreenshotDataset(
         dataset_root,
         split="test",
-        label_to_index=label_to_index,
+        label_to_index=dataset_label_to_index,
         input_size=config.input_size,
     )
 
@@ -502,7 +550,7 @@ def train_model(
     )
 
     model = SiameseRegressionClassifier(
-        num_classes=len(label_to_index),
+        num_classes=len(regression_label_to_index),
         pretrained=config.pretrained,
     ).to(device)
     optimizer = AdamW(
@@ -513,7 +561,9 @@ def train_model(
 
     amp_enabled = config.amp and device.type == "cuda"
     scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
-    index_to_label = {index: label for label, index in label_to_index.items()}
+    index_to_label = {
+        index: label for label, index in regression_label_to_index.items()
+    }
 
     operational_checkpoint_path = Path(config.checkpoint_path)
     operational_checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
@@ -535,6 +585,7 @@ def train_model(
             scaler=scaler,
             amp_enabled=amp_enabled,
             index_to_label=index_to_label,
+            regression_index_lookup=regression_index_lookup,
         )
         with torch.inference_mode():
             validation_metrics = _run_epoch(
@@ -545,6 +596,7 @@ def train_model(
                 scaler=scaler,
                 amp_enabled=amp_enabled,
                 index_to_label=index_to_label,
+                regression_index_lookup=regression_index_lookup,
                 return_outputs=True,
             )
 
@@ -581,7 +633,8 @@ def train_model(
                     optimizer=optimizer,
                     epoch=epoch,
                     config=config,
-                    label_to_index=label_to_index,
+                    dataset_label_to_index=dataset_label_to_index,
+                    regression_label_to_index=regression_label_to_index,
                     dataset_metadata=dataset_metadata,
                     validation_metrics=validation_metrics,
                     checkpoint_role="multiclass",
@@ -601,7 +654,8 @@ def train_model(
                     optimizer=optimizer,
                     epoch=epoch,
                     config=config,
-                    label_to_index=label_to_index,
+                    dataset_label_to_index=dataset_label_to_index,
+                    regression_label_to_index=regression_label_to_index,
                     dataset_metadata=dataset_metadata,
                     validation_metrics=validation_metrics,
                     checkpoint_role="operational",
@@ -627,6 +681,7 @@ def train_model(
             scaler=scaler,
             amp_enabled=amp_enabled,
             index_to_label=index_to_label,
+            regression_index_lookup=regression_index_lookup,
             binary_threshold=operational_threshold,
         )
 
@@ -640,9 +695,10 @@ def train_model(
         )
 
     benchmark = {
-        "format_version": 1,
+        "format_version": 2,
         "dataset": {
             "version": dataset_metadata.get("version"),
+            "generation_profile": dataset_metadata.get("generation_profile", "standard"),
             "split": "test",
             "examples": len(test_dataset),
             "class_distribution": _test_split_distribution(test_dataset),
@@ -675,7 +731,9 @@ def train_model(
         "multiclass_checkpoint": str(multiclass_checkpoint_path.resolve()),
         "device": device.type,
         "amp_enabled": amp_enabled,
-        "classes": label_to_index,
+        "classes": regression_label_to_index,
+        "dataset_classes": dataset_label_to_index,
+        "classification_scope": "regression_only",
         "best_epoch": best_multiclass_epoch,
         "best_multiclass_epoch": best_multiclass_epoch,
         "best_validation_macro_f1": best_macro_f1,

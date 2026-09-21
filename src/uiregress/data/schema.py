@@ -70,6 +70,7 @@ class DatasetSummary:
     manifest: str
     splits: dict[str, int]
     generation_mode: str = "random"
+    generation_profile: str = "standard"
     samples_per_class: int | None = None
     class_distribution: dict[str, int] = field(default_factory=dict)
     split_class_distribution: dict[str, dict[str, int]] = field(default_factory=dict)

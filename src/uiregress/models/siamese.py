@@ -15,7 +15,7 @@ class SiameseOutput(NamedTuple):
 class SiameseRegressionClassifier(nn.Module):
     """Shared ResNet-18 encoder with binary and regression-type heads."""
 
-    architecture_name = "resnet18-siamese-dual-head-v1"
+    architecture_name = "resnet18-siamese-conditional-type-v2"
 
     def __init__(self, num_classes: int, pretrained: bool = True) -> None:
         super().__init__()
@@ -36,7 +36,7 @@ class SiameseRegressionClassifier(nn.Module):
             nn.Dropout(p=0.2),
         )
         self.binary_head = nn.Linear(512, 1)
-        self.class_head = nn.Linear(512, num_classes)
+        self.type_head = nn.Linear(512, num_classes)
 
     def forward(self, baseline: torch.Tensor, current: torch.Tensor) -> SiameseOutput:
         baseline_features = self.encoder(baseline)
@@ -49,5 +49,5 @@ class SiameseRegressionClassifier(nn.Module):
         shared = self.comparison(pair_features)
         return SiameseOutput(
             binary_logits=self.binary_head(shared).squeeze(1),
-            class_logits=self.class_head(shared),
+            class_logits=self.type_head(shared),
         )
