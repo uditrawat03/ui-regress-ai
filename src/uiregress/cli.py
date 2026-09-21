@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict
+from pathlib import Path
 
 import torch
 import typer
@@ -107,6 +108,13 @@ def generate_dataset_command(
     overwrite: bool = typer.Option(False, "--overwrite"),
 ) -> None:
     """Generate a versioned paired screenshot dataset with known regressions."""
+    fixtures_path = Path(fixtures_dir).resolve()
+    output_path = Path(output).resolve()
+    typer.echo(
+        f"Generating dataset from {fixtures_path} -> {output_path}",
+        err=True,
+    )
+
     try:
         from uiregress.data.generator import generate_dataset
 
@@ -125,8 +133,15 @@ def generate_dataset_command(
         typer.echo(str(exc), err=True)
         raise typer.Exit(code=2) from exc
 
-    typer.echo(json.dumps(summary.to_dict(), indent=2))
+    payload = summary.to_dict()
+    payload["output"] = str(output_path)
+    typer.echo(json.dumps(payload, indent=2))
+
+
+def main() -> None:
+    """Run the UIRegressAI command-line application."""
+    app()
 
 
 if __name__ == "__main__":
-    app()
+    main()

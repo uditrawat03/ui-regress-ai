@@ -27,7 +27,7 @@ dataset = [
 ]
 
 [project.scripts]
-uiregress = "uiregress.cli:app"
+uiregress = "uiregress.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uiregress"]

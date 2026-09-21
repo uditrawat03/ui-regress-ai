@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-import random
-from typing import Any
+from typing import Any, Self
 
 from uiregress.data.augment import add_subtle_pixel_noise
 from uiregress.data.mutations import choose_mutation, no_regression_mutation
@@ -27,6 +27,10 @@ class RenderedPair:
     browser: dict[str, str]
 
 
+BROWSER_LAUNCH_TIMEOUT_MS = 15_000
+PAGE_ACTION_TIMEOUT_MS = 10_000
+
+
 class PlaywrightRenderer:
     def __init__(self, *, width: int, height: int) -> None:
         if width <= 0 or height <= 0:
@@ -35,7 +39,7 @@ class PlaywrightRenderer:
         self._playwright: Playwright | None = None
         self._browser: Browser | None = None
 
-    def __enter__(self) -> PlaywrightRenderer:
+    def __enter__(self) -> Self:
         if sync_playwright is None:
             raise RuntimeError(
                 "Playwright is not installed. Run `uv sync --all-extras` and "
@@ -44,12 +48,18 @@ class PlaywrightRenderer:
 
         self._playwright = sync_playwright().start()
         try:
-            self._browser = self._playwright.chromium.launch(headless=True)
+            self._browser = self._playwright.chromium.launch(
+                headless=True,
+                channel="chromium",
+                timeout=BROWSER_LAUNCH_TIMEOUT_MS,
+            )
         except Exception as exc:
             self._playwright.stop()
             self._playwright = None
             raise RuntimeError(
-                "Chromium could not be launched. Run `uv run playwright install chromium`."
+                "Chromium could not be launched with Playwright's full Chromium channel. "
+                "Run `uv run playwright install chromium`. "
+                f"Original error: {exc}"
             ) from exc
         return self
 
@@ -72,6 +82,8 @@ class PlaywrightRenderer:
             reduced_motion="reduce",
         )
         page = context.new_page()
+        page.set_default_timeout(PAGE_ACTION_TIMEOUT_MS)
+        page.set_default_navigation_timeout(PAGE_ACTION_TIMEOUT_MS)
         page.emulate_media(reduced_motion="reduce", color_scheme="light")
         return page
 
@@ -162,7 +174,11 @@ class PlaywrightRenderer:
 
         page = self._page()
         try:
-            page.goto(fixture.resolve().as_uri(), wait_until="load")
+            page.goto(
+                fixture.resolve().as_uri(),
+                wait_until="domcontentloaded",
+                timeout=PAGE_ACTION_TIMEOUT_MS,
+            )
             page.screenshot(path=str(baseline_path), full_page=False, animations="disabled")
 
             if no_regression:

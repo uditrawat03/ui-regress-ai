@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import random
 import shutil
+from pathlib import Path
 
 from uiregress.data.renderer import PlaywrightRenderer
 from uiregress.data.schema import DatasetSummary, SampleManifest
