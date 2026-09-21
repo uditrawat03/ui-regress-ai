@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kanban Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#eef2f7; color:#172033; }
+button,input { font:inherit; }
+
+.top{height:74px;background:white;border-bottom:1px solid #dbe3ed;padding:0 30px;display:flex;align-items:center;justify-content:space-between}.new{background:#7c3aed;color:white;padding:10px 15px;border-radius:8px}.board{padding:24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.column{background:#e4e9f1;border-radius:12px;padding:14px;min-height:610px}.column h3{display:flex;justify-content:space-between}.task{background:white;border:1px solid #d6dee9;border-radius:10px;padding:15px;margin:12px 0;box-shadow:0 3px 8px rgba(15,23,42,.04)}.tag{display:inline-block;background:#ede9fe;color:#6d28d9;border-radius:12px;padding:5px 8px;font-size:12px;margin-bottom:9px}.meta{display:flex;justify-content:space-between;color:#64748b;font-size:13px;margin-top:14px}
+
+</style>
+</head>
+<body>
+<header class="top"><div><b>Launch Board</b> · Website refresh</div><div class="new" data-uiregress-target="new-task">New task</div></header><main class="board" data-uiregress-target="kanban-board"><section class="column"><h3>Backlog <span>4</span></h3><article class="task" data-uiregress-target="task-research"><span class="tag">Research</span><b>Review competitor onboarding</b><div class="meta"><span>Maya</span><span>Sep 23</span></div></article><article class="task"><span class="tag">Content</span><b>Draft launch FAQ</b><div class="meta"><span>Alex</span><span>Sep 25</span></div></article></section><section class="column" data-uiregress-target="progress-column"><h3>In progress <span>3</span></h3><article class="task" data-uiregress-target="task-navigation"><span class="tag">Design</span><b>Responsive navigation states</b><div class="meta"><span>Udit</span><span>Today</span></div></article><article class="task"><span class="tag">Dev</span><b>Pricing API integration</b><div class="meta"><span>Sam</span><span>Tomorrow</span></div></article></section><section class="column"><h3>Review <span>2</span></h3><article class="task" data-uiregress-target="task-checkout"><span class="tag">QA</span><b>Checkout accessibility pass</b><div class="meta"><span>Nina</span><span>Today</span></div></article></section><section class="column"><h3>Done <span>8</span></h3><article class="task"><span class="tag">Design</span><b>New color tokens</b><div class="meta"><span>Leo</span><span>Sep 18</span></div></article></section></main>
+</body>
+</html>

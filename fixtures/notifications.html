@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f8fafc; color:#172033; }
+button,input { font:inherit; }
+
+.wrap{max-width:760px;margin:38px auto}.head{display:flex;justify-content:space-between;align-items:center}.mark{color:#2563eb;font-weight:700}.tabs{display:flex;gap:8px;margin:22px 0}.tab{background:white;border:1px solid #d6deea;padding:9px 13px;border-radius:20px}.tab.active{background:#172033;color:white}.feed{background:white;border:1px solid #d9e1eb;border-radius:14px;overflow:hidden}.notice{display:grid;grid-template-columns:48px 1fr auto;gap:14px;padding:18px;border-bottom:1px solid #edf1f5}.notice:last-child{border:0}.icon{width:42px;height:42px;border-radius:50%;background:#dbeafe;display:grid;place-items:center;font-weight:700;color:#1d4ed8}.notice p{margin:5px 0;color:#526177;line-height:1.45}.time{font-size:12px;color:#8491a5}.unread{background:#f5f9ff}
+
+</style>
+</head>
+<body>
+<div class="wrap"><div class="head"><div><h1>Notifications</h1><span>Recent workspace activity</span></div><div class="mark" data-uiregress-target="mark-read">Mark all as read</div></div><div class="tabs" data-uiregress-target="notification-tabs"><div class="tab active">All</div><div class="tab">Mentions</div><div class="tab">System</div></div><section class="feed" data-uiregress-target="notification-feed"><article class="notice unread" data-uiregress-target="approval-notice"><div class="icon">A</div><div><b>Approval requested</b><p>Maya asked you to review “Homepage v4”.</p></div><span class="time">4m</span></article><article class="notice unread" data-uiregress-target="comment-notice"><div class="icon">C</div><div><b>New comment</b><p>Alex mentioned you in the checkout discussion.</p></div><span class="time">18m</span></article><article class="notice"><div class="icon">D</div><div><b>Deployment completed</b><p>Production release 2.8.4 finished successfully.</p></div><span class="time">1h</span></article><article class="notice" data-uiregress-target="billing-notice"><div class="icon">B</div><div><b>Invoice ready</b><p>Your September invoice is now available.</p></div><span class="time">Yesterday</span></article></section></div>
+</body>
+</html>

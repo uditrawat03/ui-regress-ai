@@ -4,8 +4,10 @@ import asyncio
 import json
 import random
 import shutil
+from collections.abc import Iterator
 from pathlib import Path
 
+from uiregress.data.mutations import ALL_LABELS
 from uiregress.data.renderer import PlaywrightRenderer
 from uiregress.data.schema import DatasetSummary, SampleManifest
 from uiregress.data.splitting import split_fixtures
@@ -21,12 +23,36 @@ def _prepare_output(output: Path, *, overwrite: bool) -> None:
     output.mkdir(parents=True, exist_ok=True)
 
 
+def _sample_plan(
+    *,
+    master_rng: random.Random,
+    samples_per_fixture: int,
+    samples_per_class: int | None,
+) -> Iterator[tuple[int, int, bool, str | None, str | None]]:
+    """Yield sample index, seed, no-regression flag, forced label, expected label."""
+    if samples_per_class is None:
+        for index in range(samples_per_fixture):
+            sample_seed = master_rng.randrange(0, 2**31)
+            yield index, sample_seed, False, None, None
+        return
+
+    index = 0
+    for label in ALL_LABELS:
+        for _ in range(samples_per_class):
+            sample_seed = master_rng.randrange(0, 2**31)
+            no_regression = label == "no_regression"
+            forced_label = None if no_regression else label
+            yield index, sample_seed, no_regression, forced_label, label
+            index += 1
+
+
 async def _generate_dataset_async(
     fixtures_dir: str | Path,
     output_dir: str | Path,
     *,
     version: str,
     samples_per_fixture: int,
+    samples_per_class: int | None,
     seed: int,
     width: int,
     height: int,
@@ -35,6 +61,8 @@ async def _generate_dataset_async(
 ) -> DatasetSummary:
     if samples_per_fixture <= 0:
         raise ValueError("samples_per_fixture must be greater than zero")
+    if samples_per_class is not None and samples_per_class <= 0:
+        raise ValueError("samples_per_class must be greater than zero")
     if not 0.0 <= no_regression_fraction <= 1.0:
         raise ValueError("no_regression_fraction must be between 0 and 1")
     if not version.strip():
@@ -57,17 +85,41 @@ async def _generate_dataset_async(
     master_rng = random.Random(seed)
     manifest_path = output_path / "manifest.jsonl"
     split_counts = {"train": 0, "validation": 0, "test": 0}
+    class_distribution = {label: 0 for label in ALL_LABELS}
+    split_class_distribution = {
+        split: {label: 0 for label in ALL_LABELS}
+        for split in ("train", "validation", "test")
+    }
     total_samples = 0
+    generation_mode = "balanced" if samples_per_class is not None else "random"
+    effective_samples_per_fixture = (
+        len(ALL_LABELS) * samples_per_class
+        if samples_per_class is not None
+        else samples_per_fixture
+    )
 
     async with PlaywrightRenderer(width=width, height=height) as renderer:
         with manifest_path.open("w", encoding="utf-8") as manifest_file:
             for fixture in fixtures:
                 split = fixture_splits[fixture.stem]
-                for index in range(samples_per_fixture):
-                    sample_seed = master_rng.randrange(0, 2**31)
+                plan = _sample_plan(
+                    master_rng=master_rng,
+                    samples_per_fixture=samples_per_fixture,
+                    samples_per_class=samples_per_class,
+                )
+                for index, sample_seed, balanced_negative, forced_label, expected_label in plan:
                     sample_rng = random.Random(sample_seed)
-                    no_regression = sample_rng.random() < no_regression_fraction
-                    sample_id = f"{fixture.stem}-{index:04d}-{sample_seed:010d}"
+                    no_regression = (
+                        balanced_negative
+                        if samples_per_class is not None
+                        else sample_rng.random() < no_regression_fraction
+                    )
+                    label_token = expected_label or "random"
+                    sample_id = (
+                        f"{fixture.stem}-{label_token}-{index:04d}-{sample_seed:010d}"
+                        if samples_per_class is not None
+                        else f"{fixture.stem}-{index:04d}-{sample_seed:010d}"
+                    )
 
                     baseline_relative = Path("images") / f"{sample_id}-baseline.png"
                     current_relative = Path("images") / f"{sample_id}-current.png"
@@ -78,7 +130,13 @@ async def _generate_dataset_async(
                         rng=sample_rng,
                         sample_seed=sample_seed,
                         no_regression=no_regression,
+                        regression_label=forced_label,
                     )
+                    if expected_label is not None and rendered.label != expected_label:
+                        raise RuntimeError(
+                            "Balanced generation produced the wrong label: "
+                            f"expected {expected_label}, got {rendered.label}."
+                        )
 
                     sample = SampleManifest(
                         sample_id=sample_id,
@@ -96,6 +154,10 @@ async def _generate_dataset_async(
                     manifest_file.write(json.dumps(sample.to_dict(), sort_keys=True) + "\n")
                     manifest_file.flush()
                     split_counts[split] += 1
+                    class_distribution.setdefault(rendered.label, 0)
+                    class_distribution[rendered.label] += 1
+                    split_class_distribution[split].setdefault(rendered.label, 0)
+                    split_class_distribution[split][rendered.label] += 1
                     total_samples += 1
 
     summary = DatasetSummary(
@@ -103,9 +165,13 @@ async def _generate_dataset_async(
         seed=seed,
         total_samples=total_samples,
         fixtures=len(fixtures),
-        samples_per_fixture=samples_per_fixture,
+        samples_per_fixture=effective_samples_per_fixture,
         manifest="manifest.jsonl",
         splits=split_counts,
+        generation_mode=generation_mode,
+        samples_per_class=samples_per_class,
+        class_distribution=class_distribution,
+        split_class_distribution=split_class_distribution,
     )
     (output_path / "dataset.json").write_text(
         json.dumps(summary.to_dict(), indent=2, sort_keys=True) + "\n",
@@ -120,6 +186,7 @@ def generate_dataset(
     *,
     version: str = "synthetic-v0.1",
     samples_per_fixture: int = 8,
+    samples_per_class: int | None = None,
     seed: int = 42,
     width: int = 1280,
     height: int = 720,
@@ -128,8 +195,9 @@ def generate_dataset(
 ) -> DatasetSummary:
     """Generate a dataset using Playwright's async API.
 
-    Keeping this public function synchronous preserves the CLI and Python API while
-    avoiding Playwright's sync/greenlet bridge on Windows.
+    ``samples_per_class`` enables balanced generation and guarantees the same
+    number of examples for every semantic label on every fixture. When omitted,
+    the original random sampling behavior is preserved.
     """
     try:
         asyncio.get_running_loop()
@@ -147,6 +215,7 @@ def generate_dataset(
             output_dir,
             version=version,
             samples_per_fixture=samples_per_fixture,
+            samples_per_class=samples_per_class,
             seed=seed,
             width=width,
             height=height,

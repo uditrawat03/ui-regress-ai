@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f6f8fb; color:#172033; }
+button,input { font:inherit; }
+
+.wrap{max-width:1080px;margin:30px auto}.hero{background:#172554;color:white;border-radius:16px;padding:30px;display:flex;justify-content:space-between;align-items:center}.new{background:white;color:#172554;padding:11px 16px;border-radius:8px;font-weight:700}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}.stat,.panel{background:white;border:1px solid #dce3ed;border-radius:12px;padding:18px}.stat strong{font-size:26px;display:block;margin-top:6px}.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.search{border:1px solid #c7d2df;border-radius:8px;padding:10px 13px;width:280px}.ticket{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;padding:15px 0;border-bottom:1px solid #edf1f5;align-items:center}.priority{color:#b45309;font-weight:700}.open{color:#047857;font-weight:700}
+
+</style>
+</head>
+<body>
+<div class="wrap"><section class="hero" data-uiregress-target="support-hero"><div><h1>Customer support</h1><p>Track issues, response times, and team workload.</p></div><div class="new" data-uiregress-target="new-ticket">New ticket</div></section><div class="stats"><div class="stat" data-uiregress-target="open-stat">Open tickets<strong>28</strong></div><div class="stat" data-uiregress-target="response-stat">Avg. response<strong>18m</strong></div><div class="stat" data-uiregress-target="sla-stat">SLA met<strong>96%</strong></div></div><section class="panel" data-uiregress-target="ticket-panel"><div class="toolbar"><h2>Recent tickets</h2><div class="search" data-uiregress-target="ticket-search">Search tickets</div></div><div class="ticket" data-uiregress-target="ticket-one"><b>#1842 Login loop on mobile</b><span class="priority">High</span><span class="open">Open</span><span>12m ago</span></div><div class="ticket"><b>#1841 Invoice export error</b><span>Normal</span><span class="open">Open</span><span>31m ago</span></div><div class="ticket"><b>#1838 Team invite expired</b><span>Normal</span><span>Waiting</span><span>2h ago</span></div></section></div>
+</body>
+</html>

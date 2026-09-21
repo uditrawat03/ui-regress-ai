@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f3f6fb; color:#172033; }
+button,input { font:inherit; }
+
+.page{max-width:900px;margin:38px auto}.progress{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:30px}.dot{width:32px;height:32px;border-radius:50%;background:#dce4ef;display:grid;place-items:center}.dot.done{background:#2563eb;color:white}.line{width:80px;height:3px;background:#dce4ef}.card{background:white;border:1px solid #d9e1ec;border-radius:16px;padding:34px;box-shadow:0 12px 26px rgba(15,23,42,.05)}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}.choice{border:1px solid #cdd8e6;border-radius:12px;padding:22px;min-height:145px}.choice.selected{border:2px solid #2563eb;background:#eff6ff}.choice b{display:block;margin:12px 0}.actions{display:flex;justify-content:space-between;margin-top:28px}.back{padding:12px 18px}.next{padding:12px 20px;background:#2563eb;color:white;border-radius:8px;font-weight:700}.tip{margin-top:18px;background:#f8fafc;padding:14px;border-radius:10px;color:#526177}
+
+</style>
+</head>
+<body>
+<div class="page"><div class="progress" data-uiregress-target="progress-indicator"><div class="dot done">1</div><div class="line"></div><div class="dot done">2</div><div class="line"></div><div class="dot">3</div></div><section class="card" data-uiregress-target="onboarding-card"><span>Step 2 of 3</span><h1>What are you building?</h1><p>Choose the option that best matches your primary workflow.</p><div class="choices"><div class="choice selected" data-uiregress-target="choice-product"><span>▣</span><b>Product team</b><span>Plan, build, and review product work.</span></div><div class="choice" data-uiregress-target="choice-agency"><span>◇</span><b>Agency</b><span>Manage client projects and approvals.</span></div><div class="choice" data-uiregress-target="choice-personal"><span>○</span><b>Personal</b><span>Organize individual projects and ideas.</span></div></div><div class="tip" data-uiregress-target="onboarding-tip">You can change this later in workspace settings.</div><div class="actions"><div class="back">Back</div><div class="next" data-uiregress-target="continue-button">Continue</div></div></section></div>
+</body>
+</html>

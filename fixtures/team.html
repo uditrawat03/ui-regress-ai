@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f7f9fc; color:#172033; }
+button,input { font:inherit; }
+
+.wrap{max-width:1040px;margin:34px auto}.head{display:flex;justify-content:space-between;align-items:center}.invite{background:#2563eb;color:white;padding:11px 16px;border-radius:8px}.summary{display:flex;gap:10px;margin:20px 0}.pill{background:white;border:1px solid #d8e1eb;padding:9px 13px;border-radius:20px}.panel{background:white;border:1px solid #d9e1eb;border-radius:12px;overflow:hidden}.member{display:grid;grid-template-columns:2fr 1fr 1fr 120px;align-items:center;padding:16px 20px;border-bottom:1px solid #edf1f5}.person{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;background:#dbeafe;color:#1e40af;border-radius:50%;display:grid;place-items:center;font-weight:700}.role{background:#f1f5f9;padding:6px 9px;border-radius:15px;width:max-content}.menu{text-align:right;color:#64748b}
+
+</style>
+</head>
+<body>
+<div class="wrap"><div class="head"><div><h1>Team members</h1><span>Manage access and roles</span></div><div class="invite" data-uiregress-target="invite-member">Invite member</div></div><div class="summary" data-uiregress-target="team-summary"><div class="pill">24 active</div><div class="pill">3 pending</div><div class="pill">5 admins</div></div><section class="panel" data-uiregress-target="member-list"><div class="member" data-uiregress-target="member-udit"><div class="person"><div class="avatar">UR</div><div><b>Udit Rawat</b><br><span>udit@example.com</span></div></div><span class="role">Admin</span><span>Active</span><span class="menu">•••</span></div><div class="member" data-uiregress-target="member-maya"><div class="person"><div class="avatar">MC</div><div><b>Maya Chen</b><br><span>maya@example.com</span></div></div><span class="role">Editor</span><span>Active</span><span class="menu">•••</span></div><div class="member"><div class="person"><div class="avatar">AS</div><div><b>Alex Singh</b><br><span>alex@example.com</span></div></div><span class="role">Viewer</span><span>Pending</span><span class="menu">•••</span></div><div class="member" data-uiregress-target="member-nina"><div class="person"><div class="avatar">NP</div><div><b>Nina Patel</b><br><span>nina@example.com</span></div></div><span class="role">Editor</span><span>Active</span><span class="menu">•••</span></div></section></div>
+</body>
+</html>

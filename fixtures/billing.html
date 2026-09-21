@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Billing Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f7f8fb; color:#172033; }
+button,input { font:inherit; }
+
+.wrap{max-width:1050px;margin:32px auto}.top{display:flex;justify-content:space-between;align-items:center}.action{background:#111827;color:white;padding:11px 16px;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}.panel{background:white;border:1px solid #dce3ed;border-radius:12px;padding:22px}.plan{font-size:28px;font-weight:700;margin:10px 0}.usage{height:12px;background:#e8edf5;border-radius:8px;overflow:hidden}.fill{height:100%;width:64%;background:#2563eb}.invoice{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;align-items:center;padding:14px 0;border-bottom:1px solid #edf0f4}.status{background:#dcfce7;color:#166534;padding:6px 10px;border-radius:16px}.method{display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:16px;border-radius:10px;margin-top:14px}
+
+</style>
+</head>
+<body>
+<div class="wrap"><div class="top"><div><h1>Billing & subscription</h1><span>Manage plan and payment details</span></div><div class="action" data-uiregress-target="upgrade-button">Upgrade plan</div></div><div class="grid"><section class="panel" data-uiregress-target="current-plan"><span>Current plan</span><div class="plan">Pro workspace</div><p>$49 per month · renews Oct 21</p><div class="usage" data-uiregress-target="usage-meter"><div class="fill"></div></div><p>64% of monthly processing used</p></section><section class="panel" data-uiregress-target="payment-method"><h2>Payment method</h2><div class="method"><div><b>Visa ending 4242</b><br><span>Expires 09/29</span></div><span data-uiregress-target="edit-card">Edit</span></div></section></div><section class="panel" style="margin-top:18px" data-uiregress-target="invoice-list"><h2>Invoices</h2><div class="invoice"><b>September 2026</b><span>$49.00</span><span class="status">Paid</span><span>PDF</span></div><div class="invoice" data-uiregress-target="invoice-row"><b>August 2026</b><span>$49.00</span><span class="status">Paid</span><span>PDF</span></div></section></div>
+</body>
+</html>

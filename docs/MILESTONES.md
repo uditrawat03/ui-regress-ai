@@ -54,6 +54,17 @@ Exit condition: one command generates a versioned paired-image dataset.
 
 Exit condition: CUDA training is reproducible and beats at least one classical baseline on semantic cases.
 
+### Milestone 3.1 — Dataset diversity and class balance
+
+- [x] balanced per-class synthetic generation
+- [x] expand fixture corpus from 3 to 18 pages
+- [x] preserve fixture-level train/validation/test isolation
+- [x] record global class distribution
+- [x] record per-split class distribution
+- [x] keep random generation mode backward compatible
+
+Exit condition: `synthetic-v0.2` can generate 1,080 balanced pairs with 12 train, 3 validation, and 3 test fixtures.
+
 ## Milestone 4 — Localization
 
 - [ ] heatmap/localization target generation

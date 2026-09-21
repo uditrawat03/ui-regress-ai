@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f8fafc; color:#172033; }
+button,input { font:inherit; }
+
+.hero{text-align:center;padding:46px 20px 28px}.hero h1{font-size:42px;margin:0 0 12px}.toggle{display:inline-flex;background:#e9eef5;border-radius:24px;padding:4px;margin-top:14px}.toggle span{padding:8px 14px}.toggle .active{background:white;border-radius:20px;box-shadow:0 2px 6px rgba(15,23,42,.08)}.plans{max-width:1050px;margin:18px auto 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.plan{background:white;border:1px solid #d8e1ec;border-radius:16px;padding:26px}.plan.featured{border:2px solid #2563eb;transform:translateY(-8px)}.price{font-size:38px;font-weight:700;margin:18px 0}.button{padding:12px;text-align:center;border:1px solid #2563eb;color:#1d4ed8;border-radius:8px;font-weight:700}.featured .button{background:#2563eb;color:white}.feature{padding:10px 0;border-bottom:1px solid #edf1f5}.badge{display:inline-block;background:#dbeafe;color:#1d4ed8;padding:6px 9px;border-radius:14px;font-size:12px}
+
+</style>
+</head>
+<body>
+<section class="hero"><h1>Plans that scale with your team</h1><p data-uiregress-target="pricing-subtitle">Start small and upgrade when your workflow grows.</p><div class="toggle" data-uiregress-target="billing-toggle"><span class="active">Monthly</span><span>Yearly · save 20%</span></div></section><main class="plans"><article class="plan" data-uiregress-target="starter-plan"><h2>Starter</h2><div class="price">$0</div><p>For personal projects and experiments.</p><div class="button">Get started</div><div class="feature">3 projects</div><div class="feature">Basic reports</div></article><article class="plan featured" data-uiregress-target="pro-plan"><span class="badge">Most popular</span><h2>Pro</h2><div class="price">$49</div><p>For growing product and engineering teams.</p><div class="button" data-uiregress-target="pro-button">Start Pro</div><div class="feature">Unlimited projects</div><div class="feature">Advanced analytics</div></article><article class="plan" data-uiregress-target="enterprise-plan"><h2>Enterprise</h2><div class="price">Custom</div><p>Security and control for large organizations.</p><div class="button" data-uiregress-target="sales-button">Contact sales</div><div class="feature">SSO & SCIM</div><div class="feature">Dedicated support</div></article></main>
+</body>
+</html>

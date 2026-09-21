@@ -7,7 +7,11 @@ from pathlib import Path
 from typing import Any, Self
 
 from uiregress.data.augment import add_subtle_pixel_noise
-from uiregress.data.mutations import choose_mutation, no_regression_mutation
+from uiregress.data.mutations import (
+    choose_mutation,
+    choose_mutation_for_label,
+    no_regression_mutation,
+)
 from uiregress.data.schema import BoundingBox, MutationSpec
 
 try:
@@ -165,6 +169,7 @@ class PlaywrightRenderer:
         rng: random.Random,
         sample_seed: int,
         no_regression: bool,
+        regression_label: str | None = None,
     ) -> RenderedPair:
         if not fixture.is_file():
             raise FileNotFoundError(f"Fixture not found: {fixture}")
@@ -186,6 +191,8 @@ class PlaywrightRenderer:
             )
 
             if no_regression:
+                if regression_label is not None:
+                    raise ValueError("regression_label cannot be set for a no-regression sample.")
                 mutation = no_regression_mutation()
                 add_subtle_pixel_noise(
                     baseline_path,
@@ -196,7 +203,11 @@ class PlaywrightRenderer:
                 region = None
             else:
                 selectors = await self._selectors(page)
-                mutation = choose_mutation(rng, selectors)
+                mutation = (
+                    choose_mutation_for_label(rng, selectors, regression_label)
+                    if regression_label is not None
+                    else choose_mutation(rng, selectors)
+                )
                 locator = page.locator(mutation.selector)
                 before = BoundingBox.from_mapping(await locator.bounding_box())
                 if before is None:

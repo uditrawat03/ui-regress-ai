@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f6f8fb; color:#172033; }
+button,input { font:inherit; }
+
+.app{display:grid;grid-template-columns:210px 360px 1fr;height:100vh}.nav{background:#172033;color:white;padding:24px}.nav div{padding:11px 8px;margin:6px 0}.selected{background:#2c3f5d;border-radius:8px}.list{background:white;border-right:1px solid #dce4ef;overflow:hidden}.list-head{padding:20px;border-bottom:1px solid #e5eaf1}.message{padding:16px 18px;border-bottom:1px solid #edf1f5}.message b{display:block;margin-bottom:6px}.message.active{background:#eef5ff;border-left:4px solid #2563eb}.content{padding:34px}.sender{display:flex;justify-content:space-between;align-items:center}.body{margin-top:28px;line-height:1.7;max-width:720px}.reply{margin-top:28px;border:1px solid #ccd7e5;border-radius:10px;padding:16px;color:#64748b}.send{display:inline-block;margin-top:12px;background:#2563eb;color:white;padding:10px 16px;border-radius:8px}
+
+</style>
+</head>
+<body>
+<div class="app"><aside class="nav"><h2>Mail</h2><div class="selected">Inbox 12</div><div>Starred</div><div>Sent</div><div>Archive</div></aside><section class="list" data-uiregress-target="message-list"><div class="list-head"><b>Inbox</b></div><div class="message active" data-uiregress-target="active-message"><b>Project Aurora update</b><span>Maya · 10:42 AM</span><p>Latest design review notes are ready...</p></div><div class="message"><b>Invoice approved</b><span>Finance · 9:18 AM</span><p>Your September invoice was approved...</p></div><div class="message"><b>Weekly digest</b><span>Workspace · Yesterday</span><p>14 tasks completed this week...</p></div></section><main class="content"><div class="sender" data-uiregress-target="sender-header"><div><h1>Project Aurora update</h1><span>Maya Chen &lt;maya@example.com&gt;</span></div><span>10:42 AM</span></div><div class="body" data-uiregress-target="message-body"><p>Hi team,</p><p>The latest design review is complete. We resolved the navigation feedback and updated the mobile states. Please review the attached notes before tomorrow's planning session.</p><p>Thanks,<br>Maya</p></div><div class="reply" data-uiregress-target="reply-box">Write a reply…<br><div class="send" data-uiregress-target="send-button">Send reply</div></div></main></div>
+</body>
+</html>

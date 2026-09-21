@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f4f7fb; color:#172033; }
+button,input { font:inherit; }
+
+.shell{display:grid;grid-template-columns:190px 1fr;min-height:100vh}.side{background:#172033;color:white;padding:26px 18px}.side b{font-size:20px}.side div{padding:11px;margin-top:8px;border-radius:8px}.active{background:#2b3f62}.main{padding:30px}.head{display:flex;justify-content:space-between;align-items:center}.range{background:white;border:1px solid #d8e1ee;padding:10px 15px;border-radius:8px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.card,.chart,.table{background:white;border:1px solid #d8e1ee;border-radius:12px;padding:18px}.num{font-size:28px;font-weight:700;margin-top:12px}.chart{height:230px;display:flex;align-items:end;gap:14px}.bar{width:11%;background:#3b82f6;border-radius:7px 7px 0 0}.table{margin-top:16px}.row{display:grid;grid-template-columns:2fr 1fr 1fr;padding:12px 0;border-bottom:1px solid #edf1f6}
+
+</style>
+</head>
+<body>
+<div class="shell"><aside class="side"><b>Pulse</b><div class="active">Overview</div><div>Funnels</div><div>Segments</div><div>Exports</div></aside><main class="main"><div class="head"><div><h1>Product analytics</h1><span>Last 30 days performance</span></div><div class="range" data-uiregress-target="date-range">Aug 22 – Sep 21</div></div><section class="metrics"><div class="card" data-uiregress-target="visitors"><span>Visitors</span><div class="num">48.2K</div></div><div class="card" data-uiregress-target="sessions"><span>Sessions</span><div class="num">62.9K</div></div><div class="card" data-uiregress-target="conversion"><span>Conversion</span><div class="num">4.8%</div></div><div class="card" data-uiregress-target="revenue"><span>Revenue</span><div class="num">$91K</div></div></section><section class="chart" data-uiregress-target="traffic-chart"><div class="bar" style="height:48%"></div><div class="bar" style="height:72%"></div><div class="bar" style="height:58%"></div><div class="bar" style="height:84%"></div><div class="bar" style="height:67%"></div><div class="bar" style="height:92%"></div></section><section class="table" data-uiregress-target="channels-table"><h2>Top channels</h2><div class="row"><b>Organic</b><span>21,430</span><span>+12%</span></div><div class="row"><b>Direct</b><span>14,820</span><span>+7%</span></div></section></main></div>
+</body>
+</html>

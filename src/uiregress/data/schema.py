@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
 DatasetSplit = Literal["train", "validation", "test"]
@@ -69,6 +69,10 @@ class DatasetSummary:
     samples_per_fixture: int
     manifest: str
     splits: dict[str, int]
+    generation_mode: str = "random"
+    samples_per_class: int | None = None
+    class_distribution: dict[str, int] = field(default_factory=dict)
+    split_class_distribution: dict[str, dict[str, int]] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

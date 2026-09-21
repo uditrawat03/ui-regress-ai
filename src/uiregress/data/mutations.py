@@ -50,13 +50,16 @@ MUTATION_TEMPLATES: tuple[MutationTemplate, ...] = (
     MutationTemplate("overflow_hidden", "text_clipping", _clip_parameters),
     MutationTemplate("change_style_token", "unexpected_style", _style_parameters),
 )
+REGRESSION_LABELS: tuple[str, ...] = tuple(template.label for template in MUTATION_TEMPLATES)
+ALL_LABELS: tuple[str, ...] = ("no_regression", *REGRESSION_LABELS)
+_TEMPLATE_BY_LABEL = {template.label: template for template in MUTATION_TEMPLATES}
 
 
-def choose_mutation(rng: random.Random, selectors: list[str]) -> MutationSpec:
-    if not selectors:
-        raise ValueError("Fixture does not contain any data-uiregress-target elements.")
-
-    template = rng.choice(MUTATION_TEMPLATES)
+def _mutation_from_template(
+    template: MutationTemplate,
+    rng: random.Random,
+    selectors: list[str],
+) -> MutationSpec:
     selector = rng.choice(selectors)
     return MutationSpec(
         operator=template.operator,
@@ -64,6 +67,32 @@ def choose_mutation(rng: random.Random, selectors: list[str]) -> MutationSpec:
         selector=selector,
         parameters=template.parameters(rng),
     )
+
+
+def choose_mutation(rng: random.Random, selectors: list[str]) -> MutationSpec:
+    if not selectors:
+        raise ValueError("Fixture does not contain any data-uiregress-target elements.")
+
+    template = rng.choice(MUTATION_TEMPLATES)
+    return _mutation_from_template(template, rng, selectors)
+
+
+def choose_mutation_for_label(
+    rng: random.Random,
+    selectors: list[str],
+    label: str,
+) -> MutationSpec:
+    """Choose a seeded mutation for a specific semantic regression label."""
+    if not selectors:
+        raise ValueError("Fixture does not contain any data-uiregress-target elements.")
+
+    try:
+        template = _TEMPLATE_BY_LABEL[label]
+    except KeyError as exc:
+        raise ValueError(
+            f"Unknown regression label: {label}. Expected one of: {', '.join(REGRESSION_LABELS)}"
+        ) from exc
+    return _mutation_from_template(template, rng, selectors)
 
 
 def no_regression_mutation() -> MutationSpec:

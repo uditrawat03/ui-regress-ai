@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventory Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f4f6f9; color:#172033; }
+button,input { font:inherit; }
+
+.wrap{max-width:1180px;margin:28px auto}.head{display:flex;justify-content:space-between;align-items:center}.add{background:#0f766e;color:white;padding:11px 16px;border-radius:8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}.stat,.table{background:white;border:1px solid #dbe2ea;border-radius:12px;padding:18px}.stat strong{display:block;font-size:29px;margin-top:8px}.filters{display:flex;gap:10px;margin-bottom:14px}.filter{background:white;border:1px solid #cad4df;padding:10px 13px;border-radius:8px}.table{padding:0;overflow:hidden}.row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;padding:15px 18px;border-bottom:1px solid #edf1f5;align-items:center}.row.header{background:#f8fafc;font-size:13px;color:#64748b}.low{color:#b91c1c;font-weight:700}.ok{color:#047857;font-weight:700}
+
+</style>
+</head>
+<body>
+<div class="wrap"><div class="head"><div><h1>Inventory</h1><span>Warehouse availability</span></div><div class="add" data-uiregress-target="add-product">Add product</div></div><section class="stats"><div class="stat" data-uiregress-target="sku-stat">Active SKUs<strong>1,248</strong></div><div class="stat" data-uiregress-target="stock-stat">Units in stock<strong>18,492</strong></div><div class="stat" data-uiregress-target="low-stat">Low stock<strong>23</strong></div></section><div class="filters"><div class="filter" data-uiregress-target="search-filter">Search products</div><div class="filter">All categories ▾</div><div class="filter">All warehouses ▾</div></div><section class="table" data-uiregress-target="inventory-table"><div class="row header"><span>Product</span><span>SKU</span><span>Stock</span><span>Status</span><span>Location</span></div><div class="row" data-uiregress-target="inventory-row"><b>Wireless keyboard</b><span>KB-1042</span><span>148</span><span class="ok">In stock</span><span>A-12</span></div><div class="row"><b>USB-C hub</b><span>HB-2088</span><span>7</span><span class="low">Low</span><span>B-03</span></div><div class="row"><b>27-inch monitor</b><span>MN-4410</span><span>62</span><span class="ok">In stock</span><span>C-09</span></div></section></div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f5f7fb; color:#172033; }
+button,input { font:inherit; }
+
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}.sidebar{background:white;border-right:1px solid #dce3ed;padding:24px}.mini{border:1px solid #dce3ed;border-radius:10px;padding:14px;margin-top:22px}.main{padding:26px}.toolbar{display:flex;justify-content:space-between;align-items:center}.controls{display:flex;gap:8px}.control{background:white;border:1px solid #cdd7e5;padding:9px 12px;border-radius:8px}.week{margin-top:18px;display:grid;grid-template-columns:repeat(5,1fr);background:white;border:1px solid #dce3ed;border-radius:12px;overflow:hidden}.day{min-height:560px;border-right:1px solid #e7ecf3;padding:12px}.day:last-child{border:0}.day h3{margin:0 0 18px}.event{padding:10px;border-radius:8px;background:#dbeafe;color:#1e3a8a;margin:10px 0;line-height:1.4}.green{background:#dcfce7;color:#166534}.purple{background:#ede9fe;color:#5b21b6}
+
+</style>
+</head>
+<body>
+<div class="app"><aside class="sidebar"><h2>Calendar</h2><div class="mini" data-uiregress-target="mini-calendar"><b>September 2026</b><p>21 22 23 24 25 26 27</p><p>28 29 30</p></div><p data-uiregress-target="calendar-filter">● Work<br><br>● Personal<br><br>● Focus time</p></aside><main class="main"><div class="toolbar"><div><h1>Sep 21 – 25</h1><span>Weekly schedule</span></div><div class="controls"><div class="control" data-uiregress-target="today-button">Today</div><div class="control" data-uiregress-target="view-switcher">Week ▾</div></div></div><section class="week" data-uiregress-target="week-grid"><div class="day"><h3>Mon 21</h3><div class="event" data-uiregress-target="standup-event">09:30 Team stand-up</div><div class="event green">14:00 Design review</div></div><div class="day"><h3>Tue 22</h3><div class="event purple">11:00 Product sync</div></div><div class="day"><h3>Wed 23</h3><div class="event">10:00 Customer call</div></div><div class="day"><h3>Thu 24</h3><div class="event green">15:00 Planning</div></div><div class="day"><h3>Fri 25</h3><div class="event purple">13:00 Demo</div></div></section></main></div>
+</body>
+</html>

@@ -45,6 +45,8 @@ def test_generate_dataset_command_invokes_generator(monkeypatch, tmp_path) -> No
             "test-v0.1",
             "--samples-per-fixture",
             "1",
+            "--samples-per-class",
+            "2",
             "--seed",
             "42",
             "--overwrite",
@@ -55,6 +57,7 @@ def test_generate_dataset_command_invokes_generator(monkeypatch, tmp_path) -> No
     assert called["fixtures_dir"] == str(fixtures)
     assert called["output_dir"] == str(output)
     assert called["version"] == "test-v0.1"
+    assert called["samples_per_class"] == 2
     assert '"total_samples": 3' in result.output
     assert '"output":' in result.output
 

@@ -95,6 +95,15 @@ def generate_dataset_command(
     ),
     version: str = typer.Option("synthetic-v0.1", "--version"),
     samples_per_fixture: int = typer.Option(8, "--samples-per-fixture", min=1),
+    samples_per_class: int | None = typer.Option(
+        None,
+        "--samples-per-class",
+        min=1,
+        help=(
+            "Generate an equal number of samples for every semantic label on every "
+            "fixture. Overrides random class sampling when set."
+        ),
+    ),
     seed: int = typer.Option(42, "--seed"),
     width: int = typer.Option(1280, "--width", min=1),
     height: int = typer.Option(720, "--height", min=1),
@@ -123,6 +132,7 @@ def generate_dataset_command(
             output,
             version=version,
             samples_per_fixture=samples_per_fixture,
+            samples_per_class=samples_per_class,
             seed=seed,
             width=width,
             height=height,

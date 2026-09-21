@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#f5f7fa; color:#172033; }
+button,input { font:inherit; }
+
+.shell{max-width:1000px;margin:32px auto;display:grid;grid-template-columns:210px 1fr;gap:24px}.nav{background:white;border:1px solid #dce3ec;border-radius:12px;padding:14px;height:max-content}.nav div{padding:11px;border-radius:8px}.nav .active{background:#eef4ff;color:#1d4ed8;font-weight:700}.panel{background:white;border:1px solid #dce3ec;border-radius:12px;padding:28px}.section{padding:22px 0;border-bottom:1px solid #edf1f5}.section:first-of-type{padding-top:8px}.field{display:grid;grid-template-columns:180px 1fr;align-items:center;margin:14px 0}.input{border:1px solid #bdc9d8;border-radius:8px;padding:12px}.toggle{width:44px;height:24px;background:#2563eb;border-radius:20px;padding:3px}.knob{width:18px;height:18px;background:white;border-radius:50%;margin-left:20px}.save{margin-top:24px;background:#2563eb;color:white;display:inline-block;padding:12px 18px;border-radius:8px;font-weight:700}
+
+</style>
+</head>
+<body>
+<div class="shell"><aside class="nav" data-uiregress-target="settings-nav"><div class="active">General</div><div>Members</div><div>Security</div><div>Integrations</div><div>Billing</div></aside><main class="panel" data-uiregress-target="settings-panel"><h1>Workspace settings</h1><section class="section"><h2>General</h2><div class="field"><span>Workspace name</span><div class="input" data-uiregress-target="workspace-name">Aurora Labs</div></div><div class="field"><span>Timezone</span><div class="input" data-uiregress-target="timezone-field">Asia/Kolkata</div></div></section><section class="section" data-uiregress-target="preferences-section"><h2>Preferences</h2><div class="field"><span>Weekly summary</span><div class="toggle" data-uiregress-target="summary-toggle"><div class="knob"></div></div></div><div class="field"><span>Approval reminders</span><div class="toggle"><div class="knob"></div></div></div></section><div class="save" data-uiregress-target="settings-save">Save changes</div></main></div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authentication Fixture</title>
+<style>
+* { box-sizing:border-box; animation:none!important; transition:none!important; }
+body { margin:0; font-family:Arial,sans-serif; background:#eaf0f8; color:#172033; }
+button,input { font:inherit; }
+
+.page{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr}.hero{padding:70px;background:#172554;color:white;display:flex;flex-direction:column;justify-content:center}.hero h1{font-size:52px;max-width:520px;margin:0 0 18px}.hero p{font-size:19px;line-height:1.6;max-width:520px}.panel-wrap{display:grid;place-items:center;padding:40px}.panel{width:410px;background:white;border:1px solid #d5deeb;border-radius:16px;padding:32px;box-shadow:0 14px 34px rgba(15,23,42,.08)}.field{margin-top:18px}.label{font-size:13px;color:#64748b;margin-bottom:7px}.input{height:48px;border:1px solid #bcc8d8;border-radius:8px;padding:14px}.button{margin-top:22px;background:#2563eb;color:white;text-align:center;padding:14px;border-radius:8px;font-weight:700}.helper{margin-top:16px;text-align:center;color:#64748b}.badge{display:inline-block;background:#dbeafe;color:#1e40af;padding:8px 12px;border-radius:20px;margin-bottom:18px}
+
+</style>
+</head>
+<body>
+<div class="page"><section class="hero" data-uiregress-target="auth-hero"><div class="badge" data-uiregress-target="security-badge">Secure workspace</div><h1>Welcome back to your team workspace.</h1><p data-uiregress-target="hero-copy">Review projects, approvals, reports, and activity from one place.</p></section><section class="panel-wrap"><div class="panel" data-uiregress-target="login-panel"><h2>Sign in</h2><div class="field"><div class="label">Email</div><div class="input" data-uiregress-target="email-field">udit@example.com</div></div><div class="field"><div class="label">Password</div><div class="input" data-uiregress-target="password-field">••••••••••••</div></div><div class="button" data-uiregress-target="sign-in-button">Continue</div><div class="helper" data-uiregress-target="login-helper">Forgot password? Reset access</div></div></section></div>
+</body>
+</html>
