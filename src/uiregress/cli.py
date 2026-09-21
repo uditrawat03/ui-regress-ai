@@ -138,6 +138,72 @@ def generate_dataset_command(
     typer.echo(json.dumps(payload, indent=2))
 
 
+@app.command("train")
+def train_command(
+    dataset: str = typer.Option(
+        "data/generated/synthetic-v0.1",
+        "--dataset",
+        help="Generated dataset root containing dataset.json and manifest.jsonl.",
+    ),
+    checkpoint: str = typer.Option(
+        "artifacts/checkpoints/milestone3-best.pt",
+        "--checkpoint",
+        help="Path for the best validation checkpoint.",
+    ),
+    epochs: int = typer.Option(5, "--epochs", min=1),
+    batch_size: int = typer.Option(8, "--batch-size", min=1),
+    learning_rate: float = typer.Option(1e-4, "--learning-rate", min=1e-9),
+    input_size: int = typer.Option(224, "--input-size", min=32),
+    num_workers: int = typer.Option(0, "--num-workers", min=0),
+    seed: int = typer.Option(42, "--seed"),
+    device: str = typer.Option("auto", "--device", help="auto, cpu, or cuda"),
+    amp: bool = typer.Option(True, "--amp/--no-amp", help="Use CUDA automatic mixed precision."),
+    pretrained: bool = typer.Option(
+        True,
+        "--pretrained/--no-pretrained",
+        help="Initialize the shared ResNet-18 encoder with ImageNet weights.",
+    ),
+) -> None:
+    """Train the first dual-head Siamese visual-regression model."""
+    try:
+        from uiregress.training import TrainingConfig, train_model
+
+        config = TrainingConfig(
+            dataset_root=dataset,
+            checkpoint_path=checkpoint,
+            epochs=epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            input_size=input_size,
+            num_workers=num_workers,
+            seed=seed,
+            device=device,
+            amp=amp,
+            pretrained=pretrained,
+        )
+
+        def report_epoch(payload: dict[str, object]) -> None:
+            validation = payload["validation"]
+            if not isinstance(validation, dict):
+                return
+            multiclass = validation.get("multiclass", {})
+            macro_f1 = multiclass.get("macro_f1") if isinstance(multiclass, dict) else None
+            typer.echo(
+                f"epoch={payload['epoch']} "
+                f"train_loss={payload['train']['loss']:.4f} "
+                f"val_loss={validation['loss']:.4f} "
+                f"val_macro_f1={float(macro_f1):.4f}",
+                err=True,
+            )
+
+        summary = train_model(config, progress=report_epoch)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(json.dumps(summary, indent=2))
+
+
 def main() -> None:
     """Run the UIRegressAI command-line application."""
     app()

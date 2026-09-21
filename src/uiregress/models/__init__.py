@@ -1,3 +1,3 @@
-from .siamese import SiameseRegressionClassifier
+from .siamese import SiameseOutput, SiameseRegressionClassifier
 
-__all__ = ["SiameseRegressionClassifier"]
+__all__ = ["SiameseOutput", "SiameseRegressionClassifier"]

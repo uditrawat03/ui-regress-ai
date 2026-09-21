@@ -43,14 +43,14 @@ Exit condition: one command generates a versioned paired-image dataset.
 
 ## Milestone 3 — First PyTorch model
 
-- [ ] dataset class
-- [ ] shared encoder model
-- [ ] binary regression head
-- [ ] multi-class regression head
-- [ ] training loop
-- [ ] AMP support
-- [ ] checkpoint metadata
-- [ ] validation metrics
+- [x] dataset class
+- [x] shared encoder model
+- [x] binary regression head
+- [x] multi-class regression head
+- [x] training loop
+- [x] AMP support
+- [x] checkpoint metadata
+- [x] validation metrics
 
 Exit condition: CUDA training is reproducible and beats at least one classical baseline on semantic cases.
 

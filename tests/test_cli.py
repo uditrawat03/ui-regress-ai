@@ -57,3 +57,64 @@ def test_generate_dataset_command_invokes_generator(monkeypatch, tmp_path) -> No
     assert called["version"] == "test-v0.1"
     assert '"total_samples": 3' in result.output
     assert '"output":' in result.output
+
+
+def test_train_command_invokes_training(monkeypatch, tmp_path) -> None:
+    dataset = tmp_path / "dataset"
+    checkpoint = tmp_path / "best.pt"
+    dataset.mkdir()
+    called: dict[str, object] = {}
+
+    def fake_train_model(config, *, progress=None):
+        called["config"] = config
+        if progress is not None:
+            progress(
+                {
+                    "epoch": 1,
+                    "train": {"loss": 1.0},
+                    "validation": {
+                        "loss": 0.8,
+                        "multiclass": {"macro_f1": 0.5},
+                    },
+                }
+            )
+        return {
+            "checkpoint": str(checkpoint),
+            "device": "cpu",
+            "amp_enabled": False,
+            "classes": {"no_regression": 0, "layout_shift": 1},
+            "best_epoch": 1,
+            "best_validation_macro_f1": 0.5,
+            "history": [],
+            "history_file": str(checkpoint.with_suffix(".history.json")),
+        }
+
+    monkeypatch.setattr("uiregress.training.train_model", fake_train_model)
+
+    result = runner.invoke(
+        app,
+        [
+            "train",
+            "--dataset",
+            str(dataset),
+            "--checkpoint",
+            str(checkpoint),
+            "--epochs",
+            "1",
+            "--batch-size",
+            "2",
+            "--device",
+            "cpu",
+            "--no-pretrained",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    config = called["config"]
+    assert config.dataset_root == str(dataset)
+    assert config.checkpoint_path == str(checkpoint)
+    assert config.epochs == 1
+    assert config.batch_size == 2
+    assert config.device == "cpu"
+    assert config.pretrained is False
+    assert '"best_epoch": 1' in result.output
