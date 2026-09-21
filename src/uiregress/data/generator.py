@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import random
 import shutil
@@ -20,17 +21,17 @@ def _prepare_output(output: Path, *, overwrite: bool) -> None:
     output.mkdir(parents=True, exist_ok=True)
 
 
-def generate_dataset(
+async def _generate_dataset_async(
     fixtures_dir: str | Path,
     output_dir: str | Path,
     *,
-    version: str = "synthetic-v0.1",
-    samples_per_fixture: int = 8,
-    seed: int = 42,
-    width: int = 1280,
-    height: int = 720,
-    no_regression_fraction: float = 0.25,
-    overwrite: bool = False,
+    version: str,
+    samples_per_fixture: int,
+    seed: int,
+    width: int,
+    height: int,
+    no_regression_fraction: float,
+    overwrite: bool,
 ) -> DatasetSummary:
     if samples_per_fixture <= 0:
         raise ValueError("samples_per_fixture must be greater than zero")
@@ -58,44 +59,44 @@ def generate_dataset(
     split_counts = {"train": 0, "validation": 0, "test": 0}
     total_samples = 0
 
-    with PlaywrightRenderer(width=width, height=height) as renderer, manifest_path.open(
-        "w", encoding="utf-8"
-    ) as manifest_file:
-        for fixture in fixtures:
-            split = fixture_splits[fixture.stem]
-            for index in range(samples_per_fixture):
-                sample_seed = master_rng.randrange(0, 2**31)
-                sample_rng = random.Random(sample_seed)
-                no_regression = sample_rng.random() < no_regression_fraction
-                sample_id = f"{fixture.stem}-{index:04d}-{sample_seed:010d}"
+    async with PlaywrightRenderer(width=width, height=height) as renderer:
+        with manifest_path.open("w", encoding="utf-8") as manifest_file:
+            for fixture in fixtures:
+                split = fixture_splits[fixture.stem]
+                for index in range(samples_per_fixture):
+                    sample_seed = master_rng.randrange(0, 2**31)
+                    sample_rng = random.Random(sample_seed)
+                    no_regression = sample_rng.random() < no_regression_fraction
+                    sample_id = f"{fixture.stem}-{index:04d}-{sample_seed:010d}"
 
-                baseline_relative = Path("images") / f"{sample_id}-baseline.png"
-                current_relative = Path("images") / f"{sample_id}-current.png"
-                rendered = renderer.render_pair(
-                    fixture,
-                    output_path / baseline_relative,
-                    output_path / current_relative,
-                    rng=sample_rng,
-                    sample_seed=sample_seed,
-                    no_regression=no_regression,
-                )
+                    baseline_relative = Path("images") / f"{sample_id}-baseline.png"
+                    current_relative = Path("images") / f"{sample_id}-current.png"
+                    rendered = await renderer.render_pair(
+                        fixture,
+                        output_path / baseline_relative,
+                        output_path / current_relative,
+                        rng=sample_rng,
+                        sample_seed=sample_seed,
+                        no_regression=no_regression,
+                    )
 
-                sample = SampleManifest(
-                    sample_id=sample_id,
-                    fixture=fixture.name,
-                    split=split,
-                    seed=sample_seed,
-                    baseline=baseline_relative.as_posix(),
-                    current=current_relative.as_posix(),
-                    label=rendered.label,
-                    viewport={"width": width, "height": height},
-                    region=rendered.region,
-                    mutation=rendered.mutation,
-                    browser=rendered.browser,
-                )
-                manifest_file.write(json.dumps(sample.to_dict(), sort_keys=True) + "\n")
-                split_counts[split] += 1
-                total_samples += 1
+                    sample = SampleManifest(
+                        sample_id=sample_id,
+                        fixture=fixture.name,
+                        split=split,
+                        seed=sample_seed,
+                        baseline=baseline_relative.as_posix(),
+                        current=current_relative.as_posix(),
+                        label=rendered.label,
+                        viewport={"width": width, "height": height},
+                        region=rendered.region,
+                        mutation=rendered.mutation,
+                        browser=rendered.browser,
+                    )
+                    manifest_file.write(json.dumps(sample.to_dict(), sort_keys=True) + "\n")
+                    manifest_file.flush()
+                    split_counts[split] += 1
+                    total_samples += 1
 
     summary = DatasetSummary(
         version=version,
@@ -111,3 +112,45 @@ def generate_dataset(
         encoding="utf-8",
     )
     return summary
+
+
+def generate_dataset(
+    fixtures_dir: str | Path,
+    output_dir: str | Path,
+    *,
+    version: str = "synthetic-v0.1",
+    samples_per_fixture: int = 8,
+    seed: int = 42,
+    width: int = 1280,
+    height: int = 720,
+    no_regression_fraction: float = 0.25,
+    overwrite: bool = False,
+) -> DatasetSummary:
+    """Generate a dataset using Playwright's async API.
+
+    Keeping this public function synchronous preserves the CLI and Python API while
+    avoiding Playwright's sync/greenlet bridge on Windows.
+    """
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        pass
+    else:
+        raise RuntimeError(
+            "generate_dataset() cannot run inside an active asyncio event loop. "
+            "Call _generate_dataset_async() from async code instead."
+        )
+
+    return asyncio.run(
+        _generate_dataset_async(
+            fixtures_dir,
+            output_dir,
+            version=version,
+            samples_per_fixture=samples_per_fixture,
+            seed=seed,
+            width=width,
+            height=height,
+            no_regression_fraction=no_regression_fraction,
+            overwrite=overwrite,
+        )
+    )

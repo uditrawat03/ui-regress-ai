@@ -11,12 +11,12 @@ from uiregress.data.mutations import choose_mutation, no_regression_mutation
 from uiregress.data.schema import BoundingBox, MutationSpec
 
 try:
-    from playwright.sync_api import Browser, Page, Playwright, sync_playwright
+    from playwright.async_api import Browser, Page, Playwright, async_playwright
 except ImportError:  # pragma: no cover - exercised on installations without dataset extra
     Browser = Any  # type: ignore[misc,assignment]
     Page = Any  # type: ignore[misc,assignment]
     Playwright = Any  # type: ignore[misc,assignment]
-    sync_playwright = None
+    async_playwright = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,68 +39,68 @@ class PlaywrightRenderer:
         self._playwright: Playwright | None = None
         self._browser: Browser | None = None
 
-    def __enter__(self) -> Self:
-        if sync_playwright is None:
+    async def __aenter__(self) -> Self:
+        if async_playwright is None:
             raise RuntimeError(
                 "Playwright is not installed. Run `uv sync --all-extras` and "
                 "`uv run playwright install chromium`."
             )
 
-        self._playwright = sync_playwright().start()
+        self._playwright = await async_playwright().start()
         try:
-            self._browser = self._playwright.chromium.launch(
+            self._browser = await self._playwright.chromium.launch(
                 headless=True,
                 channel="chromium",
                 timeout=BROWSER_LAUNCH_TIMEOUT_MS,
             )
         except Exception as exc:
-            self._playwright.stop()
+            await self._playwright.stop()
             self._playwright = None
             raise RuntimeError(
-                "Chromium could not be launched with Playwright's full Chromium channel. "
+                "Chromium could not be launched with Playwright. "
                 "Run `uv run playwright install chromium`. "
                 f"Original error: {exc}"
             ) from exc
         return self
 
-    def __exit__(self, *_: object) -> None:
+    async def __aexit__(self, *_: object) -> None:
         if self._browser is not None:
-            self._browser.close()
+            await self._browser.close()
         if self._playwright is not None:
-            self._playwright.stop()
+            await self._playwright.stop()
         self._browser = None
         self._playwright = None
 
-    def _page(self) -> Page:
+    async def _page(self) -> Page:
         if self._browser is None:
-            raise RuntimeError("PlaywrightRenderer must be used as a context manager.")
-        context = self._browser.new_context(
+            raise RuntimeError("PlaywrightRenderer must be used as an async context manager.")
+        context = await self._browser.new_context(
             viewport=self.viewport,
             device_scale_factor=1,
             locale="en-US",
             color_scheme="light",
             reduced_motion="reduce",
         )
-        page = context.new_page()
+        page = await context.new_page()
         page.set_default_timeout(PAGE_ACTION_TIMEOUT_MS)
         page.set_default_navigation_timeout(PAGE_ACTION_TIMEOUT_MS)
-        page.emulate_media(reduced_motion="reduce", color_scheme="light")
+        await page.emulate_media(reduced_motion="reduce", color_scheme="light")
         return page
 
     @staticmethod
-    def _selectors(page: Page) -> list[str]:
-        target_names = page.locator("[data-uiregress-target]").evaluate_all(
+    async def _selectors(page: Page) -> list[str]:
+        target_names = await page.locator("[data-uiregress-target]").evaluate_all(
             "els => els.map(el => el.dataset.uiregressTarget)"
         )
         unique_names = sorted({str(name) for name in target_names if name})
         return [f'[data-uiregress-target="{name}"]' for name in unique_names]
 
     @staticmethod
-    def _apply_mutation(page: Page, mutation: MutationSpec) -> None:
+    async def _apply_mutation(page: Page, mutation: MutationSpec) -> None:
         if mutation.selector is None:
             return
 
-        applied = page.evaluate(
+        applied = await page.evaluate(
             """
             ({selector, operator, parameters}) => {
               const element = document.querySelector(selector);
@@ -156,7 +156,7 @@ class PlaywrightRenderer:
         except PackageNotFoundError:
             return "unknown"
 
-    def render_pair(
+    async def render_pair(
         self,
         fixture: Path,
         baseline_path: Path,
@@ -172,14 +172,18 @@ class PlaywrightRenderer:
         baseline_path.parent.mkdir(parents=True, exist_ok=True)
         current_path.parent.mkdir(parents=True, exist_ok=True)
 
-        page = self._page()
+        page = await self._page()
         try:
-            page.goto(
+            await page.goto(
                 fixture.resolve().as_uri(),
                 wait_until="domcontentloaded",
                 timeout=PAGE_ACTION_TIMEOUT_MS,
             )
-            page.screenshot(path=str(baseline_path), full_page=False, animations="disabled")
+            await page.screenshot(
+                path=str(baseline_path),
+                full_page=False,
+                animations="disabled",
+            )
 
             if no_regression:
                 mutation = no_regression_mutation()
@@ -191,18 +195,22 @@ class PlaywrightRenderer:
                 )
                 region = None
             else:
-                selectors = self._selectors(page)
+                selectors = await self._selectors(page)
                 mutation = choose_mutation(rng, selectors)
                 locator = page.locator(mutation.selector)
-                before = BoundingBox.from_mapping(locator.bounding_box())
+                before = BoundingBox.from_mapping(await locator.bounding_box())
                 if before is None:
                     raise RuntimeError(f"Mutation target is not visible: {mutation.selector}")
 
-                self._apply_mutation(page, mutation)
-                page.wait_for_timeout(50)
-                after = BoundingBox.from_mapping(locator.bounding_box())
+                await self._apply_mutation(page, mutation)
+                await page.wait_for_timeout(50)
+                after = BoundingBox.from_mapping(await locator.bounding_box())
                 region = before.union(after)
-                page.screenshot(path=str(current_path), full_page=False, animations="disabled")
+                await page.screenshot(
+                    path=str(current_path),
+                    full_page=False,
+                    animations="disabled",
+                )
 
             browser_version = self._browser.version if self._browser is not None else "unknown"
             return RenderedPair(
@@ -216,4 +224,4 @@ class PlaywrightRenderer:
                 },
             )
         finally:
-            page.context.close()
+            await page.context.close()

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Self
 
 from PIL import Image
 
@@ -13,13 +14,13 @@ class FakeRenderer:
         self.width = width
         self.height = height
 
-    def __enter__(self):
+    async def __aenter__(self) -> Self:
         return self
 
-    def __exit__(self, *_: object) -> None:
+    async def __aexit__(self, *_: object) -> None:
         return None
 
-    def render_pair(
+    async def render_pair(
         self,
         fixture: Path,
         baseline_path: Path,
