@@ -173,6 +173,18 @@ def train_command(
         "--pretrained/--no-pretrained",
         help="Initialize the shared ResNet-18 encoder with ImageNet weights.",
     ),
+    minimum_binary_recall: float = typer.Option(
+        0.90,
+        "--minimum-binary-recall",
+        min=0.0,
+        max=1.0,
+        help="Minimum validation recall required by operational checkpoint selection.",
+    ),
+    classical_benchmark: bool = typer.Option(
+        True,
+        "--classical-benchmark/--no-classical-benchmark",
+        help="Benchmark MAE, changed-area ratio, and SSIM on validation/test splits.",
+    ),
 ) -> None:
     """Train the first dual-head Siamese visual-regression model."""
     try:
@@ -190,6 +202,8 @@ def train_command(
             device=device,
             amp=amp,
             pretrained=pretrained,
+            minimum_binary_recall=minimum_binary_recall,
+            classical_benchmark=classical_benchmark,
         )
 
         def report_epoch(payload: dict[str, object]) -> None:
@@ -198,11 +212,21 @@ def train_command(
                 return
             multiclass = validation.get("multiclass", {})
             macro_f1 = multiclass.get("macro_f1") if isinstance(multiclass, dict) else None
+            binary = validation.get("binary", {})
+            fpr = binary.get("false_positive_rate") if isinstance(binary, dict) else None
+            threshold = validation.get("binary_threshold")
+            operational = ""
+            if fpr is not None and threshold is not None:
+                operational = (
+                    f" val_fpr={float(fpr):.4f}"
+                    f" val_threshold={float(threshold):.4f}"
+                )
             typer.echo(
                 f"epoch={payload['epoch']} "
                 f"train_loss={payload['train']['loss']:.4f} "
                 f"val_loss={validation['loss']:.4f} "
-                f"val_macro_f1={float(macro_f1):.4f}",
+                f"val_macro_f1={float(macro_f1):.4f}"
+                f"{operational}",
                 err=True,
             )
 

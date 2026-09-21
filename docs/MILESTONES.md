@@ -65,6 +65,19 @@ Exit condition: CUDA training is reproducible and beats at least one classical b
 
 Exit condition: `synthetic-v0.2` can generate 1,080 balanced pairs with 12 train, 3 validation, and 3 test fixtures.
 
+### Milestone 3.2 — Operational evaluation and classical benchmark
+
+- [x] validation-only binary threshold calibration
+- [x] separate operational and best-multiclass checkpoints
+- [x] operational selection prioritizes recall and false-positive rate
+- [x] untouched test-split evaluation
+- [x] per-class confusion matrix
+- [x] validation-calibrated MAE, changed-area, and SSIM baselines
+- [x] machine-readable benchmark artifact
+- [ ] learned detector beats at least one classical baseline on the frozen test split
+
+Exit condition: threshold and checkpoint selection never use the test split, and `benchmark.json` shows the learned detector adds measurable value over a classical baseline.
+
 ## Milestone 4 — Localization
 
 - [ ] heatmap/localization target generation
