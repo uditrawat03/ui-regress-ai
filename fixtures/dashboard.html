@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UIRegressAI Dashboard Fixture</title>
+  <style>
+    * { box-sizing: border-box; animation: none !important; transition: none !important; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f7fb; color: #172033; }
+    .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    aside { background: white; padding: 28px 20px; border-right: 1px solid #dbe3ef; }
+    .brand { font-size: 22px; font-weight: 700; color: #1267e5; margin-bottom: 28px; }
+    nav div { padding: 12px; margin-bottom: 8px; border-radius: 8px; }
+    nav .active { background: #eaf3ff; color: #1267e5; }
+    main { padding: 32px; overflow: hidden; }
+    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    h1 { margin: 0 0 5px; }
+    .button { background: #1267e5; color: white; padding: 12px 18px; border-radius: 8px; font-weight: 700; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: white; border: 1px solid #dde5f0; border-radius: 12px; padding: 20px; min-height: 126px; box-shadow: 0 4px 12px rgba(25, 45, 70, .06); }
+    .metric { font-size: 32px; font-weight: 700; margin-top: 16px; }
+    .panel { margin-top: 18px; background: white; border: 1px solid #dde5f0; border-radius: 12px; padding: 20px; }
+    .chart { height: 200px; background: linear-gradient(180deg, #eef6ff, #ffffff); display: flex; align-items: end; gap: 18px; padding: 20px; overflow: hidden; }
+    .bar { width: 54px; background: #3b82f6; border-radius: 8px 8px 0 0; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">UIRegressAI</div>
+      <nav>
+        <div class="active">Dashboard</div><div>Projects</div><div>Comparisons</div><div>Datasets</div><div>Settings</div>
+      </nav>
+    </aside>
+    <main>
+      <div class="top">
+        <div><h1>Dashboard</h1><span>Monitor visual regression tests</span></div>
+        <div class="button" data-uiregress-target="new-comparison">New Comparison</div>
+      </div>
+      <section class="cards">
+        <article class="card" data-uiregress-target="total-comparisons"><div>Total Comparisons</div><div class="metric">124</div></article>
+        <article class="card" data-uiregress-target="regressions"><div>Regressions</div><div class="metric">3</div></article>
+        <article class="card" data-uiregress-target="pass-rate"><div>Pass Rate</div><div class="metric">97.6%</div></article>
+      </section>
+      <section class="panel" data-uiregress-target="chart-panel">
+        <h2>Comparisons Over Time</h2>
+        <div class="chart"><div class="bar" style="height:45%"></div><div class="bar" style="height:72%"></div><div class="bar" style="height:58%"></div><div class="bar" style="height:88%"></div><div class="bar" style="height:64%"></div></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

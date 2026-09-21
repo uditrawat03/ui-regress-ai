@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout Fixture</title>
+  <style>
+    * { box-sizing: border-box; animation: none !important; transition: none !important; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #162033; }
+    header { height: 74px; background: white; border-bottom: 1px solid #dbe3ef; display:flex; align-items:center; padding:0 48px; font-weight:700; font-size:22px; }
+    main { max-width: 1040px; margin: 40px auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 26px; }
+    .panel { background:white; border:1px solid #dbe3ef; border-radius:14px; padding:26px; box-shadow:0 6px 18px rgba(0,0,0,.05); overflow:visible; }
+    label { display:block; font-size:13px; margin:18px 0 7px; color:#53627a; }
+    .input { height:48px; border:1px solid #b9c6d8; border-radius:8px; padding:14px; background:#fff; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .pay { margin-top:24px; background:#111827; color:white; text-align:center; padding:15px; border-radius:8px; font-weight:700; }
+    .summary-row { display:flex; justify-content:space-between; margin:16px 0; }
+    .total { border-top:1px solid #dbe3ef; padding-top:18px; font-weight:700; font-size:20px; }
+    .note { margin-top:22px; padding:14px; background:#eff6ff; border-radius:8px; line-height:1.5; }
+  </style>
+</head>
+<body>
+<header>Acme Checkout</header>
+<main>
+  <section class="panel" data-uiregress-target="payment-form">
+    <h1>Payment details</h1>
+    <label>Card number</label><div class="input" data-uiregress-target="card-number">4242 4242 4242 4242</div>
+    <div class="row" data-uiregress-target="card-meta">
+      <div><label>Expiry</label><div class="input">09 / 29</div></div>
+      <div><label>CVV</label><div class="input">123</div></div>
+    </div>
+    <div class="pay" data-uiregress-target="pay-button">Pay $89.00</div>
+  </section>
+  <aside class="panel" data-uiregress-target="order-summary">
+    <h2>Order summary</h2>
+    <div class="summary-row"><span>Plan</span><span>$79.00</span></div>
+    <div class="summary-row"><span>Tax</span><span>$10.00</span></div>
+    <div class="summary-row total"><span>Total</span><span>$89.00</span></div>
+    <div class="note" data-uiregress-target="security-note">Your payment information is encrypted and processed securely.</div>
+  </aside>
+</main>
+</body>
+</html>

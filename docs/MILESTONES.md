@@ -31,13 +31,13 @@ Exit condition: we can benchmark a deterministic non-ML solution.
 
 ## Milestone 2 — Synthetic dataset generator
 
-- [ ] Playwright renderer
-- [ ] reusable fixture pages
-- [ ] seeded mutation engine
-- [ ] bounding-box capture
-- [ ] dataset manifest writer
-- [ ] no-regression augmentations
-- [ ] fixture-level train/val/test splitting
+- [x] Playwright renderer
+- [x] reusable fixture pages
+- [x] seeded mutation engine
+- [x] bounding-box capture
+- [x] dataset manifest writer
+- [x] no-regression augmentations
+- [x] fixture-level train/val/test splitting
 
 Exit condition: one command generates a versioned paired-image dataset.
 

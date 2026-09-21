@@ -84,5 +84,49 @@ def compare(
         raise typer.Exit(code=1)
 
 
+@app.command("generate-dataset")
+def generate_dataset_command(
+    fixtures_dir: str = typer.Option(
+        "fixtures", "--fixtures-dir", help="Directory containing reusable HTML fixtures."
+    ),
+    output: str = typer.Option(
+        "data/generated/synthetic-v0.1", "--output", help="Dataset output directory."
+    ),
+    version: str = typer.Option("synthetic-v0.1", "--version"),
+    samples_per_fixture: int = typer.Option(8, "--samples-per-fixture", min=1),
+    seed: int = typer.Option(42, "--seed"),
+    width: int = typer.Option(1280, "--width", min=1),
+    height: int = typer.Option(720, "--height", min=1),
+    no_regression_fraction: float = typer.Option(
+        0.25,
+        "--no-regression-fraction",
+        min=0.0,
+        max=1.0,
+        help="Fraction of generated pairs that contain only tolerated pixel noise.",
+    ),
+    overwrite: bool = typer.Option(False, "--overwrite"),
+) -> None:
+    """Generate a versioned paired screenshot dataset with known regressions."""
+    try:
+        from uiregress.data.generator import generate_dataset
+
+        summary = generate_dataset(
+            fixtures_dir,
+            output,
+            version=version,
+            samples_per_fixture=samples_per_fixture,
+            seed=seed,
+            width=width,
+            height=height,
+            no_regression_fraction=no_regression_fraction,
+            overwrite=overwrite,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(json.dumps(summary.to_dict(), indent=2))
+
+
 if __name__ == "__main__":
     app()

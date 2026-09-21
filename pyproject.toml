@@ -22,6 +22,9 @@ dev = [
   "pytest>=8",
   "ruff>=0.6",
 ]
+dataset = [
+  "playwright>=1.63,<2",
+]
 
 [project.scripts]
 uiregress = "uiregress.cli:app"
