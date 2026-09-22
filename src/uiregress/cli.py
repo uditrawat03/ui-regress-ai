@@ -154,6 +154,44 @@ def generate_dataset_command(
     typer.echo(json.dumps(payload, indent=2))
 
 
+@app.command("localization-targets")
+def localization_targets_command(
+    dataset: str = typer.Option(
+        "data/generated/synthetic-v0.3",
+        "--dataset",
+        help="Generated dataset root containing manifest.jsonl and screenshots.",
+    ),
+    split: str = typer.Option(
+        "train",
+        "--split",
+        help="Dataset split to inspect: train, validation, or test.",
+    ),
+    output: str = typer.Option(
+        "artifacts/localization-targets",
+        "--output",
+        help="Directory for ground-truth overlays, masks, and summary.json.",
+    ),
+    limit: int = typer.Option(12, "--limit", min=1),
+    mask_size: int = typer.Option(56, "--mask-size", min=1),
+) -> None:
+    """Export ground-truth localization boxes and masks for manual inspection."""
+    try:
+        from uiregress.data.localization import export_localization_targets
+
+        summary = export_localization_targets(
+            dataset,
+            output,
+            split=split,
+            limit=limit,
+            mask_size=mask_size,
+        )
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(code=2) from exc
+
+    typer.echo(json.dumps(summary, indent=2))
+
+
 @app.command("train")
 def train_command(
     dataset: str = typer.Option(

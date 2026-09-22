@@ -37,6 +37,14 @@ For samples with ground-truth regions:
 - center-point hit rate
 - recall at coarse heatmap threshold
 
+Milestone 4.1 standardizes the ground-truth target as a viewport-normalized XYXY box plus a
+coarse binary mask. Regions that extend beyond the screenshot are clamped to the viewport before
+normalization. `no_regression` samples and legacy records without a region carry an invalid
+localization flag, a zero box, and a zero mask.
+
+IoU and center-hit utilities are implemented in 4.1, but the Milestone 4 IoU gate remains open
+until a localization head produces predictions on the held-out split.
+
 The MVP does not need pixel-perfect segmentation.
 
 ## Calibration

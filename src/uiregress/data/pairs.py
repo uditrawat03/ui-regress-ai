@@ -9,6 +9,11 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
+from uiregress.data.localization import (
+    DEFAULT_LOCALIZATION_SIZE,
+    build_localization_target,
+)
+
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 NO_REGRESSION_LABEL = "no_regression"
@@ -79,14 +84,18 @@ class PairedScreenshotDataset(Dataset[dict[str, Any]]):
         split: str,
         label_to_index: dict[str, int] | None = None,
         input_size: int = 224,
+        localization_size: int = DEFAULT_LOCALIZATION_SIZE,
     ) -> None:
         if split not in {"train", "validation", "test"}:
             raise ValueError("split must be one of: train, validation, test")
+        if localization_size <= 0:
+            raise ValueError("localization_size must be greater than zero")
 
         self.root = Path(dataset_root)
         self.split = split
         self.label_to_index = label_to_index or build_label_mapping(self.root)
         self.transform = build_image_transform(input_size)
+        self.localization_size = localization_size
         self.records = [
             record for record in _read_manifest(self.root) if record.get("split") == split
         ]
@@ -115,6 +124,15 @@ class PairedScreenshotDataset(Dataset[dict[str, Any]]):
     def __getitem__(self, index: int) -> dict[str, Any]:
         record = self.records[index]
         label = str(record["label"])
+        localization = build_localization_target(
+            record,
+            mask_size=self.localization_size,
+        )
+        localization_box = (
+            localization.box.to_tensor()
+            if localization.box is not None
+            else torch.zeros(4, dtype=torch.float32)
+        )
         return {
             "baseline": self._load_image(str(record["baseline"])),
             "current": self._load_image(str(record["current"])),
@@ -126,6 +144,9 @@ class PairedScreenshotDataset(Dataset[dict[str, Any]]):
                 self.label_to_index[label],
                 dtype=torch.long,
             ),
+            "localization_valid": torch.tensor(localization.valid, dtype=torch.bool),
+            "localization_box": localization_box,
+            "localization_mask": localization.mask,
             "sample_id": str(record["sample_id"]),
             "label": label,
         }

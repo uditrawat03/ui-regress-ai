@@ -14,3 +14,4 @@ data/generated/
 *.onnx
 .env
 .DS_Store
+artifacts/*

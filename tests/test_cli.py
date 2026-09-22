@@ -121,3 +121,51 @@ def test_train_command_invokes_training(monkeypatch, tmp_path) -> None:
     assert config.device == "cpu"
     assert config.pretrained is False
     assert '"best_epoch": 1' in result.output
+
+
+def test_localization_targets_command_invokes_exporter(monkeypatch, tmp_path) -> None:
+    dataset = tmp_path / "dataset"
+    output = tmp_path / "localization"
+    dataset.mkdir()
+    called: dict[str, object] = {}
+
+    def fake_export(dataset_root, output_dir, **kwargs):
+        called["dataset_root"] = dataset_root
+        called["output_dir"] = output_dir
+        called.update(kwargs)
+        return {
+            "target_version": "normalized-xyxy-mask-v1",
+            "dataset": str(dataset_root),
+            "split": kwargs["split"],
+            "exported_samples": 2,
+        }
+
+    monkeypatch.setattr(
+        "uiregress.data.localization.export_localization_targets",
+        fake_export,
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "localization-targets",
+            "--dataset",
+            str(dataset),
+            "--output",
+            str(output),
+            "--split",
+            "validation",
+            "--limit",
+            "2",
+            "--mask-size",
+            "32",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert called["dataset_root"] == str(dataset)
+    assert called["output_dir"] == str(output)
+    assert called["split"] == "validation"
+    assert called["limit"] == 2
+    assert called["mask_size"] == 32
+    assert '"exported_samples": 2' in result.output

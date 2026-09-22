@@ -74,7 +74,7 @@ Exit condition: `synthetic-v0.2` can generate 1,080 balanced pairs with 12 train
 - [x] per-class confusion matrix
 - [x] validation-calibrated MAE, changed-area, and SSIM baselines
 - [x] machine-readable benchmark artifact
-- [ ] learned detector beats at least one classical baseline on the frozen test split
+- [x] learned detector beats at least one classical baseline on the frozen test split
 
 Exit condition: threshold and checkpoint selection never use the test split, and `benchmark.json` shows the learned detector adds measurable value over a classical baseline.
 
@@ -86,19 +86,34 @@ Exit condition: threshold and checkpoint selection never use the test split, and
 - [x] generate subtle positive mutations
 - [x] generate harmless hard-negative rendering variations
 - [x] persist generation profile and conditional-head metadata
-- [ ] learned detector beats at least one meaningful classical baseline on `synthetic-v0.3`
+- [x] learned detector beats at least one meaningful classical baseline on `synthetic-v0.3`
 
 Exit condition: the frozen v0.3 test benchmark demonstrates semantic value over at least one classical
 baseline without tuning on the test split.
 
 ## Milestone 4 — Localization
 
-- [ ] heatmap/localization target generation
+- [x] heatmap/localization target generation
 - [ ] localization head
-- [ ] IoU evaluation
+- [ ] IoU evaluation on model predictions
 - [ ] annotated result image
 
 Exit condition: predictions contain useful evidence about where the regression occurred.
+
+### Milestone 4.1 — Ground-truth localization pipeline
+
+- [x] derive normalized XYXY boxes from manifest regions
+- [x] clamp partially off-screen regions to the viewport
+- [x] generate coarse binary localization masks
+- [x] expose localization targets from `PairedScreenshotDataset`
+- [x] add box IoU metric infrastructure
+- [x] add center-point hit metric infrastructure
+- [x] export ground-truth overlay and mask images for inspection
+- [x] add `localization-targets` CLI command
+- [x] add localization target and metric tests
+
+Exit condition: existing generated datasets can produce deterministic localization targets, masks,
+and visual inspection artifacts without regenerating screenshots.
 
 ## Milestone 5 — Real-world benchmark
 

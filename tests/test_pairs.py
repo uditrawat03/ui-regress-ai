@@ -5,7 +5,14 @@ from PIL import Image
 from uiregress.data.pairs import PairedScreenshotDataset, build_label_mapping
 
 
-def _write_sample(root, *, sample_id: str, label: str, split: str) -> None:
+def _write_sample(
+    root,
+    *,
+    sample_id: str,
+    label: str,
+    split: str,
+    region: dict[str, float] | None = None,
+) -> None:
     images = root / "images"
     images.mkdir(exist_ok=True)
     baseline = images / f"{sample_id}-baseline.png"
@@ -18,6 +25,8 @@ def _write_sample(root, *, sample_id: str, label: str, split: str) -> None:
         "current": current.relative_to(root).as_posix(),
         "label": label,
         "split": split,
+        "viewport": {"width": 32, "height": 24},
+        "region": region,
     }
     with (root / "manifest.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record) + "\n")
@@ -55,3 +64,24 @@ def test_paired_dataset_returns_training_tensors(tmp_path) -> None:
     assert first["binary_target"].item() == 0.0
     assert second["binary_target"].item() == 1.0
     assert second["class_target"].item() == mapping["layout_shift"]
+    assert first["localization_valid"].item() is False
+    assert first["localization_box"].shape == (4,)
+    assert first["localization_mask"].shape == (1, 56, 56)
+    assert first["localization_mask"].sum().item() == 0.0
+
+
+def test_paired_dataset_exposes_localization_target_for_regression(tmp_path) -> None:
+    _write_sample(
+        tmp_path,
+        sample_id="localized",
+        label="layout_shift",
+        split="train",
+        region={"x": 8.0, "y": 6.0, "width": 8.0, "height": 6.0},
+    )
+
+    dataset = PairedScreenshotDataset(tmp_path, split="train", input_size=64)
+    sample = dataset[0]
+
+    assert sample["localization_valid"].item() is True
+    assert sample["localization_box"].tolist() == [0.25, 0.25, 0.5, 0.5]
+    assert sample["localization_mask"].sum().item() > 0.0
